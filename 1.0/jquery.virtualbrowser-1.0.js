@@ -9,7 +9,7 @@
 
   Usage/Init:
     * $('#popupBody').virtualBrowser(options);
-    * $('#popupBody').virtualBrowser(url);
+    * $('#popupBody').virtualBrowser(options, url);  // initial ('home') URL.
 
 
   Options:
@@ -56,7 +56,7 @@
        
 */
 
-(function($){
+(function($, undefined){
 
   
   var methods = {
@@ -72,17 +72,9 @@
       if (confIsString)
       {
         var method = methods[config];
-        if (method)
-        {
-          this.each(function(){
-              method.apply( this, [].concat(args) );
+        method  &&  this.each(function(){
+              method.apply( this, [].concat(args) );  // Normalize `args` into an array. ([].concat() does that :-)
             });
-        }
-        else
-        {
-          config = { url: config };
-          confIsString = false;
-        }
       }
 
       if (confIsString)
@@ -101,6 +93,7 @@
                 },
                 config || {};
               );
+        args && (config.url = args);
 
       }
 
