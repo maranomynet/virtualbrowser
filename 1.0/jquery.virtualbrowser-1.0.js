@@ -45,7 +45,7 @@
                               this  // the virtualBrowser body element
                               $(this).data('virtualBrowser').cfg // config object
                               request  // Object: {
-                                       //   result:     // String: The $.ajax()/$.get() callback result parameter (Read by handler)
+                                       //   result:     // String: The $.ajax()/$.get() callback responseText parameter (Read by handler)
                                        //   resultDOM:  // Element(s)/Collection to insert into the virtualBrowser body  (Set by handler)
                                        //   url:  // String the URL that was just loaded
                                        //   elm:  // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
@@ -117,8 +117,8 @@
                       url: request.url,
                       data: params,
                       type: method,
-                      complete:  function (result) {
-                                    request.result = result;
+                      complete:  function (xhr) {
+                                    request.result = xhr.responseText;
                                     var ev2 = jQuery.Event(_VBload);
                                     body.trigger(ev2, request);
                                     if ( !ev2.isDefaultPrevented() )
