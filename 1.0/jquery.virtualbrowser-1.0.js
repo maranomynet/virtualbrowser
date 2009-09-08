@@ -128,7 +128,7 @@
                                       config.loadmsgElm.detach();
                                       body
                                           .empty()
-                                          .append( request.resultDOM || $(request.result) )
+                                          .append( request.resultDOM || $(request.result.replace(/<script( |>)[\s\S]*?<\/script>/ig, '')) )
                                           .find('form')
                                               .data(_virtualBrowser+'Elm', body)
                                               .bind('submit', _handleRequest);
@@ -148,9 +148,9 @@
           if (elm)
           {
             var body = $(this).data(_virtualBrowser+'Elm') || this;
-                bfldEv = _methods['load'].call(body, elm);
-            bfldEv.isPropagationStopped() &&  e.stopPropagation();
-            !bfldEv.passThrough && e.preventDefault();
+                bfloadEv = _methods['load'].call(body, elm);
+            bfloadEv.isPropagationStopped()  &&  e.stopPropagation();
+            !bfloadEv.passThrough && e.preventDefault();
           }
         };
 
