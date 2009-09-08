@@ -98,6 +98,8 @@
               if (request.url)
               {
                 body.trigger(ev1, request);
+                ev1.passThrough  &&  ev1.preventDefault();
+
                 if ( !ev1.isDefaultPrevented() )
                 {
                   if (loadmsgMode && loadmsgMode != 'none')
