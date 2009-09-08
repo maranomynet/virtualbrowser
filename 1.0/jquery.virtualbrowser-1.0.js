@@ -19,7 +19,7 @@
     * url:           null,                      // String: Initial URL for the frame
     * params:        null,                      // Object/String: Request data (as in $.get(url, data, callback) )
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
-    * onLoad:        null,                      // Function: Shorthand for .bind('VBload' handler);
+    * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
     * loadmsgElm:    '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
     * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)
 
