@@ -142,9 +142,11 @@
 
         },
 
-
+        
       _handleRequest = function (e) {
-          var elm = $(e.target).closest('[href], form')[0];
+          var elm = e.type=='submit' ?
+                        e.target:  // <form />
+                        $(e.target).closest('[href]')[0];  // link!
           if (elm)
           {
             var body = $(this).data(_virtualBrowser+'Elm') || this;
