@@ -120,7 +120,16 @@
                       data: params,
                       type: method,
                       complete:  function (xhr) {
-                                    request.result = xhr.responseText;
+                                    var pathPrefix = request.url
+                                                          .replace(/^((https?|file):\/\/\/?)?[^\/]*/, '')
+                                                          .replace(/(.*\/).*/, '$1')
+                                                          .split(/[?#]/)[0];
+                                    request.result = xhr.responseText
+                                                          .replace(/http:\/\//gi, '^')
+                                                          .replace(/https:\/\//gi, '`')
+                                                          .replace(/(<[^>]+ (href|src)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3')
+                                                          .replace(/\^/g, 'http://')
+                                                          .replace(/`/g,  'https://');
                                     var ev2 = jQuery.Event(_VBload);
                                     body.trigger(ev2, request);
                                     if ( !ev2.isDefaultPrevented() )
@@ -143,6 +152,7 @@
         },
 
         
+
       _handleRequest = function (e) {
           var elm = e.type=='submit' ?
                         e.target:  // <form />
