@@ -120,14 +120,13 @@
                       data: params,
                       type: method,
                       complete:  function (xhr) {
-                                    var pathPrefix = request.url
-                                                          .replace(/^((https?|file):\/\/\/?)?[^\/]*/, '')
-                                                          .replace(/(.*\/).*/, '$1')
-                                                          .split(/[?#]/)[0];
+                                    var fileUrl = request.url.split('#')[0],
+                                        pathPrefix = fileUrl.split('?')[0].replace(/(.*\/).*/, '$1');
                                     request.result = xhr.responseText
+                                                          .replace(/(<[^>]+ (href|src|action)=["'])(["'\?#])/gi, '$1'+fileUrl+'$3')
                                                           .replace(/http:\/\//gi, '^')
                                                           .replace(/https:\/\//gi, '`')
-                                                          .replace(/(<[^>]+ (href|src)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3')
+                                                          .replace(/(<[^>]+ (href|src|action)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3')
                                                           .replace(/\^/g, 'http://')
                                                           .replace(/`/g,  'https://');
                                     var ev2 = jQuery.Event(_VBload);
@@ -151,7 +150,7 @@
 
         },
 
-        
+
 
       _handleRequest = function (e) {
           var elm = e.type=='submit' ?
