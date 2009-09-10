@@ -128,7 +128,7 @@
                                       config.loadmsgElm.detach();
                                       body
                                           .empty()
-                                          .append( request.resultDOM || $(request.result.replace(/<script( |>)[\s\S]*?<\/script>/ig, '')) )
+                                          .append( request.resultDOM || $(request.result.replace(/<script[ >][\s\S]*?<\/script>/gi, '')) )
                                           .find('form')
                                               .data(_virtualBrowser+'Elm', body)
                                               .bind('submit', _handleRequest);
