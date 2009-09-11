@@ -114,7 +114,6 @@
                     params = elm.serialize() + '&' + params;
                     method = elm.attr('method')||'GET';
                   }
-                  //;;;window.console&&console.log( (method||'Load')+'ing: '+ request.url + (params?'?'+params:'')  );
                   $.ajax({
                       url: request.url,
                       data: params,
