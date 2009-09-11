@@ -81,6 +81,9 @@
   var _virtualBrowser = 'virtualBrowser',  // ...to save bandwidth
       _VBbeforeload   = 'VBbeforeload',    // ...to save bandwidth
       _VBload         = 'VBload',          // ...to save bandwidth
+      _replace        = 'replace',         // ...to save bandwidth
+      _protocolSlash  = /^(https?:)?\/\//,
+
 
 
       _methods = {
@@ -92,12 +95,34 @@
                   loadmsgMode = config.loadmsgMode,
                   request = { elm: elm };
 
-              request.url = elm ?
+              url = request.url = elm ?
                                 (elm.attr('href') || elm.attr('action') || ''):
                                 url;
-              if (request.url)
+              if (url)
               {
                 body.trigger(ev1, request);
+                // trap external (non-AJAXable) URLs or links targeted at another window and set .passThrough as true
+                if (  // if passThrough is already set, then there's not need for further checks, and...
+                      !ev1.passThrough &&
+                      (
+                        (
+                          // if event handler hasn't explicitly set passThrough to false
+                          ev1.passThrough === undefined  &&  
+                          // and elm is defined, and is `target`ted at an external window  // IDEA: allow named virtualBrowsers to target and trigger 'open' actions on eachother
+                          elm  &&  elm[0].target  &&  elm[0].target != window.name
+                        ) 
+                          || // ...or...
+                        (
+                          /^([a-z]{3,12}:|\/\/)/i.test(url)  &&  // the URL starts with a protocol (as well as relative protocol URLs (//host.com/).)
+                          // and the URL doesn't start with the same hostName and portNumber as the current page.
+                          !url.toLowerCase()[_replace](_protocolSlash, '').indexOf( location.href.toLowerCase()[_replace](_protocolSlash, '').split('/')[0] ) == 0
+                        )
+                      )
+                    )
+                {
+                  ev1.passThrough = true;
+                }
+                // virtualBrowser should not handle .passThrough events.
                 ev1.passThrough  &&  ev1.preventDefault();
 
                 if ( !ev1.isDefaultPrevented() )
@@ -109,7 +134,7 @@
                   }
                   var params = config.params,
                       method;
-                  if (elm && elm.is('form') )
+                  if (elm && elm.is('form'))
                   {
                     params = elm.serialize() + '&' + params;
                     method = elm.attr('method')||'GET';
@@ -119,15 +144,21 @@
                       data: params,
                       type: method,
                       complete:  function (xhr) {
-                                    var fileUrl = request.url.split('#')[0],
-                                        pathPrefix = fileUrl.split('?')[0].replace(/(.*\/).*/, '$1');
-                                    request.result = xhr.responseText
-                                                          .replace(/(<[^>]+ (href|src|action)=["'])(["'\?#])/gi, '$1'+fileUrl+'$3')
-                                                          .replace(/http:\/\//gi, '^')
-                                                          .replace(/https:\/\//gi, '`')
-                                                          .replace(/(<[^>]+ (href|src|action)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3')
-                                                          .replace(/\^/g, 'http://')
-                                                          .replace(/`/g,  'https://');
+                                    // Example: request.url == 'http://foo.com/path/file?bar=1#anchor'
+                                    var fileUrl = request.url.split('#')[0],  // 'http://foo.com/path/file?bar=1'
+                                        pathPrefix = fileUrl.split('?')[0][_replace](/(.*\/).*/, '$1'),  // 'http://foo.com/path/'
+                                        hasQuery = /\?/.test(fileUrl),  // fileUrl contains a queryString
+                                        txt = xhr.responseText;
+                                    hasQuery  &&  ( txt = txt[_replace](/(['"])\?/gi, '$1¨<<`>>') ); // Escape "? and '? (potential urls starting with a queryString)
+                                    txt =  txt[_replace](/(<[^>]+ (href|src|action)=["'])(["'#¨])/gi, '$1'+fileUrl+'$3'); // prepend all empty/localpage urls with fileUrl
+                                    hasQuery  &&  ( txt =  txt[_replace](/(['"])¨<<`>>/gi, '$1?') // Unescape all unaffected "? and '? pairs back to normal
+                                                              [_replace](/¨<<`>>/gi, '&amp;') );  // Transform affected (all other) ? symbols into &amp;
+                                    txt =  txt[_replace](/http:\/\//gi, '^<<`>>')  // Escape all "http://" (potential URLs) for easy, cross-browser RegExp detection 
+                                              [_replace](/https:\/\//gi, '`<<`>>') // Escape all "https://" (potential URLs) for easy, cross-browser RegExp detection 
+                                              [_replace](/(<[^>]+ (href|src|action)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3') // prepend pathPrefix to all relative URLs (not starting with /, `(https://) or ^(http://)
+                                              [_replace](/\^<<`>>/g, 'http://')  // Unescape "http://" back to normal
+                                              [_replace](/`<<`>>/g,  'https://');  // Unescape "https://" back to normal
+                                    request.result = txt;
                                     var ev2 = jQuery.Event(_VBload);
                                     body.trigger(ev2, request);
                                     if ( !ev2.isDefaultPrevented() )
@@ -135,7 +166,7 @@
                                       config.loadmsgElm.detach();
                                       body
                                           .empty()
-                                          .append( request.resultDOM || $(request.result.replace(/<script[ >][\s\S]*?<\/script>/gi, '')) )
+                                          .append( request.resultDOM || $.getResultBody(request.result) )
                                           .find('form')
                                               .data(_virtualBrowser+'Elm', body)
                                               .bind('submit', _handleRequest);
