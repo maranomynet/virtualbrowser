@@ -22,7 +22,7 @@
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
     * loadmsgElm:    '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
-    * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)
+    * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)  // none == no load message; overlay == overlays the old content with the loadmsg; replace == removes the old content before displaying the loadmsg
 
   Localization:
     * jQuery.fn.virtualBrowser.i18n['lang'] = {
