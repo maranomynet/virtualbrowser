@@ -116,7 +116,7 @@
                         ) 
                           || // ...or...
                         (
-                          /^([a-z]{3,12}:|\/\/)/i.test(url)  &&  // the URL starts with a protocol (as well as relative protocol URLs (//host.com/).)
+                          /^([a-z]{3,12}:|\/\/)/i.test(url)  &&  // the URL starts with a protocol (as well as "protocol-neutral" URLs (//host.com/).)
                           // and the URL doesn't start with the same hostName and portNumber as the current page.
                           !url.toLowerCase()[_replace](_protocolSlash, '').indexOf( location.href.toLowerCase()[_replace](_protocolSlash, '').split('/')[0] ) == 0
                         )
@@ -148,18 +148,20 @@
                       type: method,
                       complete:  function (xhr) {
                                     // Example: request.url == 'http://foo.com/path/file?bar=1#anchor'
-                                    var fileUrl = request.url.split('#')[0],  // 'http://foo.com/path/file?bar=1'
-                                        pathPrefix = fileUrl.split('?')[0][_replace](/(.*\/).*/, '$1'),  // 'http://foo.com/path/'
-                                        hasQuery = /\?/.test(fileUrl),  // fileUrl contains a queryString
+                                    var fileUrl = request.url.split('#')[0],                              // 'http://foo.com/path/file?bar=1'
+                                        filePart = fileUrl[_replace](/([^?]*\/)?(.*)/, '$2'),              // file?bar=1
+                                        pathPrefix = fileUrl.split('?')[0][_replace](/(.*\/)?.*/, '$1'),  // 'http://foo.com/path/'
+                                        hasQuery = /\?/.test(fileUrl),                                     // fileUrl contains a queryString
                                         txt = xhr.responseText;
                                     hasQuery  &&  ( txt = txt[_replace](/(['"])\?/gi, '$1¨<<`>>') ); // Escape "? and '? (potential urls starting with a queryString)
-                                    txt =  txt[_replace](/(<[^>]+ (href|src|action)=["'])(["'#¨])/gi, '$1'+fileUrl+'$3'); // prepend all empty/localpage urls with fileUrl
+                                    txt =  txt[_replace](/(<[^>]+ (href|src|action)=["'])(["'#¨])/gi, '$1'+filePart+'$3'); // prepend all empty/localpage urls with filePart
                                     hasQuery  &&  ( txt =  txt[_replace](/(['"])¨<<`>>/gi, '$1?') // Unescape all unaffected "? and '? pairs back to normal
                                                               [_replace](/¨<<`>>/gi, '&amp;') );  // Transform affected (all other) ? symbols into &amp;
                                     txt =  txt[_replace](/http:\/\//gi, '^<<`>>')  // Escape all "http://" (potential URLs) for easy, cross-browser RegExp detection 
                                               [_replace](/https:\/\//gi, '`<<`>>') // Escape all "https://" (potential URLs) for easy, cross-browser RegExp detection 
-                                              [_replace](/(<[^>]+ (href|src|action)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3') // prepend pathPrefix to all relative URLs (not starting with /, `(https://) or ^(http://)
-                                              [_replace](/\^<<`>>/g, 'http://')  // Unescape "http://" back to normal
+                                              [_replace](/(<[^>]+ (href|src|action)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3') // prepend pathPrefix to all relative URLs (not starting with `/`, `//`, `(https://) or ^(http://)
+                                              [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
+                                              [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
                                               [_replace](/`<<`>>/g,  'https://');  // Unescape "https://" back to normal
                                     request.result = txt;
                                     var ev2 = jQuery.Event(_VBload);

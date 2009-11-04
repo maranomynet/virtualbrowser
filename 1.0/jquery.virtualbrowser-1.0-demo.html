@@ -7,11 +7,12 @@
   <title>jQuery.virtualBrowser</title>
   <script src="http://codecentre.eplica.is/jq/jquery-1.3.js"></script>
   <script src="http://codecentre.eplica.is/jq/eutils-1.0.js"></script>
-  <script src="jquery.virtualbrowser-1.0-min.js"></script>
+  <script src="jquery.virtualbrowser-1.0.js"></script>
   <script>
     ;;;if(!window.console){var console={log:function(m){var d=document,e=d.createElement('div');e.style.textAlign='left';e.innerHTML = '<code><b>Console:</b> '+((m.join?m.join(', '):m)+'').replace(/</g,'&lt;')+'</code>';d.body.appendChild(e)}};console.warn=console.error=console.debug=console.info=console.log;}
     ;;;jQuery.fn.log=function(){if(window.console){arguments.length&&console.log.call(console,arguments);console.log(this);}return this;}
     ;;;log = function(param, msg){ msg && window.console && console.log(msg); window.console && console.log(param); return param; };
+    ;;;String.prototype.log = function(msg){ return log(this, msg); };
 
     jQuery(function($){
 
