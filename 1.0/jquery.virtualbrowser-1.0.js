@@ -8,6 +8,7 @@
 
   Requires:
     * jQuery 1.3.3+
+    * eutils 1.0     ( $.getResultBody() )
 
 
   Usage/Init:
@@ -60,6 +61,8 @@
 
 
   TODO/ideas:
+    * Offer the onLoad handlers a cleaned DOM (stripped of <scripts/>, <link/>, etc).
+    * Remove dependency on eutils.
     * History buffer
        * Add 'back' (and 'forward'?) methods
     * Consider adding 'reload' method
@@ -166,7 +169,7 @@
                                       config.loadmsgElm.detach();
                                       body
                                           .empty()
-                                          .append( request.resultDOM || $.getResultBody(request.result) )
+                                          .append( request.resultDOM || $.getResultBody(request.result)[0].childNodes )
                                           .find('form')
                                               .data(_virtualBrowser+'Elm', body)
                                               .bind('submit', _handleRequest);

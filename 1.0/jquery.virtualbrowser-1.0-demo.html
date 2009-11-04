@@ -6,6 +6,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>jQuery.virtualBrowser</title>
   <script src="../../jquery/1.3/jquery-1.3.js"></script>
+  <script src="../../eutils/1.0/eutils-1.0.js"></script><!-- for the onLoad handler below -->
   <script src="jquery.virtualbrowser-1.0-min.js"></script>
   <script>
     ;;;if(!window.console){var console={log:function(m){var d=document,e=d.createElement('div');e.style.textAlign='left';e.innerHTML = '<code><b>Console:</b> '+((m.join?m.join(', '):m)+'').replace(/</g,'&lt;')+'</code>';d.body.appendChild(e)}};console.warn=console.error=console.debug=console.info=console.log;}
@@ -28,7 +29,7 @@
                   }
                 },
               onLoad: function (e, request) {
-                  var dom = $('<body />').append( $(request.result) );
+                  var dom = $.getResultBody( request.result );
                   dom.find('h1').each(function(i, h1Elm){
                       h1Elm = $(h1Elm);
                       h1Elm
