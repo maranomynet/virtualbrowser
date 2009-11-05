@@ -172,6 +172,10 @@
                                       body
                                           .empty()
                                           .append( request.resultDOM || $.getResultBody(request.result)[0].childNodes )
+                                          .find('[href]')
+                                              .data(_virtualBrowser+'Elm', body)
+                                              .bind('click', _handleRequest)
+                                          .end()
                                           .find('form')
                                               .data(_virtualBrowser+'Elm', body)
                                               .bind('submit', _handleRequest);
@@ -188,13 +192,11 @@
 
 
       _handleRequest = function (e) {
-          var elm = e.type=='submit' ?
-                        e.target:  // <form />
-                        $(e.target).closest('[href]')[0];  // link!
-          if (elm)
+          if (!e.isDefaultPrevented() )
           {
-            var body = $(this).data(_virtualBrowser+'Elm') || this;
-                bfloadEv = _methods['load'].call(body, elm);
+            var elm = this,
+                VBbody = $(elm).data(_virtualBrowser+'Elm') || this;
+                bfloadEv = _methods['load'].call(VBbody, elm);
             bfloadEv.isPropagationStopped()  &&  e.stopPropagation();
             !bfloadEv.passThrough && e.preventDefault();
           }
@@ -240,8 +242,7 @@
             }
 
             body
-                .data(_virtualBrowser, { cfg: config })
-                .bind('click', _handleRequest);
+                .data(_virtualBrowser, { cfg: config });
 
             config.onLoad && body.bind(_VBload, config.onLoad);
             config.onBeforeload && body.bind(_VBbeforeload, config.onBeforeload);
