@@ -21,6 +21,7 @@
     * params:        null,                      // Object/String: Request data (as in $.get(url, data, callback) )
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
+    * onLoaded:      null,                      // Function: Shorthand for .bind('VBloaded', handler);
     * loadmsgElm:    '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
     * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)  // none == no load message; overlay == overlays the old content with the loadmsg; replace == removes the old content before displaying the loadmsg
 
@@ -54,6 +55,16 @@
                               // Cancellable via e.preventDefault()
                             });
 
+    * 'VBloaded'         // .bind('VBloaded', function (e, request) {
+                              this  // the virtualBrowser body element
+                              $(this).data('virtualBrowser').cfg // config object
+                              request  // Object: {
+                                       //   url:  // String the URL that was just loaded
+                                       //   elm:  // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
+                                       // }
+                              // Uncancellable!
+                            });
+
 
   Methods:
     * 'load'     // .virtualBrowser('load', url);  // loads an url. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
@@ -84,6 +95,7 @@
   var _virtualBrowser = 'virtualBrowser',  // ...to save bandwidth
       _VBbeforeload   = 'VBbeforeload',    // ...to save bandwidth
       _VBload         = 'VBload',          // ...to save bandwidth
+      _VBloaded       = 'VBloaded',        // ...to save bandwidth
       _replace        = 'replace',         // ...to save bandwidth
       _protocolSlash  = /^(https?:)?\/\//,
 
@@ -179,6 +191,7 @@
                                           .find('form')
                                               .data(_virtualBrowser+'Elm', body)
                                               .bind('submit', _handleRequest);
+                                      body.trigger(_VBloaded, { url: request.url, elm: request.elm });
                                     }
                                   }
                       });
@@ -219,8 +232,9 @@
                     {
                       //url:         null,                      // String: Initial URL for the frame
                       //params:      null,                      // Object/String: Request data (as in $.get(url, data, callback) )
-                      //onBeforeload:   null,                   // Function: Shorthand for .bind('VBbeforeload' handler);
+                      //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
                       //onLoad:      null,                      // Function: Shorthand for .bind('VBload' handler);
+                      //onLoaded:    null,                      // Function: Shorthand for .bind('VBloaded' handler);
                       //loadmsgElm:  '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
                       loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
                     },
@@ -245,6 +259,7 @@
                 .data(_virtualBrowser, { cfg: config });
 
             config.onLoad && body.bind(_VBload, config.onLoad);
+            config.onLoaded && body.bind(_VBloaded, config.onLoaded);
             config.onBeforeload && body.bind(_VBbeforeload, config.onBeforeload);
             config.params =  typeof config.params == 'string' ?
                               config.params:
