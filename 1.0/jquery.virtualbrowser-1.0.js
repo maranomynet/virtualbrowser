@@ -213,7 +213,7 @@
             bfloadEv.isPropagationStopped()  &&  e.stopPropagation();
             !bfloadEv.passThrough && e.preventDefault();
           }
-        };
+        },
 
 
 
@@ -241,9 +241,9 @@
                     config || {}
                   );
             args && (config.url = args);
-            var body = $(this),
+            var body = this,
                 loadmsgElm = config.loadmsgElm || '<div class="loading" />',
-                loadmsg = (fnVB.i18n[body.closest('[lang]').attr('lang')] || {}).loading || fnVB.i18n.en.loading;;
+                loadmsg = (fnVB.i18n[body.closest('*[lang]').attr('lang')] || {}).loading || fnVB.i18n.en.loading;
 
             if (loadmsgElm.charAt)
             {
