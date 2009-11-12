@@ -92,7 +92,8 @@
 
 
 
-  var _virtualBrowser = 'virtualBrowser',  // ...to save bandwidth
+  var _docLoc        = document.location,
+      _virtualBrowser = 'virtualBrowser',  // ...to save bandwidth
       _VBbeforeload   = 'VBbeforeload',    // ...to save bandwidth
       _VBload         = 'VBload',          // ...to save bandwidth
       _VBloaded       = 'VBloaded',        // ...to save bandwidth
@@ -110,9 +111,14 @@
                   loadmsgMode = config.loadmsgMode,
                   request = { elm: elm };
 
-              url = request.url = elm ?
-                                (elm.attr('href') || elm.attr('action') || ''):
-                                url;
+              if (elm)
+              {
+                url = elm.attr('href');
+                url = url === undefined ? elm.attr('action') : url;
+              }
+              // Correctly resolve relative empty-string URLs (like <form action="">)
+              url = request.url = url === '' ? _docLoc.href : url;
+
               if (url)
               {
                 body.trigger(ev1, request);
@@ -130,7 +136,7 @@
                         (
                           /^([a-z]{3,12}:|\/\/)/i.test(url)  &&  // the URL starts with a protocol (as well as "protocol-neutral" URLs (//host.com/).)
                           // and the URL doesn't start with the same hostName and portNumber as the current page.
-                          !url.toLowerCase()[_replace](_protocolSlash, '').indexOf( location.href.toLowerCase()[_replace](_protocolSlash, '').split('/')[0] ) == 0
+                          !url.toLowerCase()[_replace](_protocolSlash, '').indexOf( _docLoc.href.toLowerCase()[_replace](_protocolSlash, '').split('/')[0] ) == 0
                         )
                       )
                     )
@@ -205,7 +211,7 @@
 
 
       _handleRequest = function (e) {
-          if (!e.isDefaultPrevented() )
+          if ( !e.isDefaultPrevented() )
           {
             var elm = this,
                 VBbody = $(elm).data(_virtualBrowser+'Elm') || this;
