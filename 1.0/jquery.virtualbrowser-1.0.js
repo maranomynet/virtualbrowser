@@ -107,7 +107,7 @@
               var elm = typeof url != 'string' ? $(url) : undefined,
                   body = $(this),
                   config = body.data(_virtualBrowser).cfg,
-                  ev1 = jQuery.Event(_VBbeforeload),
+                  ev1 = $.Event(_VBbeforeload),
                   loadmsgMode = config.loadmsgMode,
                   request = { elm: elm };
 
@@ -182,7 +182,7 @@
                                               [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
                                               [_replace](/`<<`>>/g,  'https://');  // Unescape "https://" back to normal
                                     request.result = txt;
-                                    var ev2 = jQuery.Event(_VBload);
+                                    var ev2 = $.Event(_VBload);
                                     body.trigger(ev2, request);
                                     if ( !ev2.isDefaultPrevented() )
                                     {
