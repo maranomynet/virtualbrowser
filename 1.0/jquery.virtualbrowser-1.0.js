@@ -148,11 +148,6 @@
 
                 if ( !ev1.isDefaultPrevented() )
                 {
-                  if (loadmsgMode && loadmsgMode != 'none')
-                  {
-                    config.loadmsgMode == 'replace'  &&  body.empty();
-                    body.append(config.loadmsgElm);
-                  }
                   var params = config.params,
                       method;
                   if (elm && elm.is('form'))
@@ -201,6 +196,11 @@
                                     }
                                   }
                       });
+                  if (loadmsgMode && loadmsgMode != 'none')
+                  {
+                    config.loadmsgMode == 'replace'  &&  body.empty();
+                    body.append(config.loadmsgElm);
+                  }
                 }
               }
               return ev1;
