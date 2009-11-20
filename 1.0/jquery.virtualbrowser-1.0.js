@@ -41,6 +41,7 @@
                                        //   elm:  // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
                                        // }
                               // Cancellable via e.preventDefault()
+                              // cancel caching of the request by setting `request.noCache == true;`
                               // e.passThrough = true;  // Instructs the virtualBrowser to disable any click events and pass the click through to the web browser
                             });
     * 'VBload'         // .bind('VBload', function (e, request) {
@@ -149,6 +150,7 @@
                 if ( !ev1.isDefaultPrevented() )
                 {
                   var params = config.params,
+                      cache = request.noCache,
                       method;
                   if (elm && elm.is('form'))
                   {
@@ -159,6 +161,7 @@
                       url: request.url,
                       data: params,
                       type: method,
+                      cache: cache !== undefined ? cache : !config.noCache,
                       complete:  function (xhr) {
                                     // Example: request.url == 'http://foo.com/path/file?bar=1#anchor'
                                     var fileUrl = request.url.split('#')[0],                              // 'http://foo.com/path/file?bar=1'
@@ -237,6 +240,7 @@
             config = $.extend(
                     {
                       //url:         null,                      // String: Initial URL for the frame
+                      //noCache:     false,                     // Controls the $.ajax() cache option 
                       //params:      null,                      // Object/String: Request data (as in $.get(url, data, callback) )
                       //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
                       //onLoad:      null,                      // Function: Shorthand for .bind('VBload' handler);
