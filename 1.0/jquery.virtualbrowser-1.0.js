@@ -158,7 +158,7 @@
                     method = elm.attr('method')||'GET';
                   }
                   $.ajax({
-                      url: request.url,
+                      url: request.url.split('#')[0],  // in case jQuery (or the Browser) chops this off before sending the request...
                       data: params,
                       type: method,
                       cache: cache !== undefined ? cache : !config.noCache,
