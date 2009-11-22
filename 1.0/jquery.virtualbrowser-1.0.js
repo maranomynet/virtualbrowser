@@ -188,6 +188,7 @@
                                       body
                                           .empty()
                                           .append( request.resultDOM || $.getResultBody(request.result)[0].childNodes )
+                                          .trigger(_VBloaded, { url: request.url, elm: request.elm })
                                           .find('[href]')
                                               .data(_virtualBrowser+'Elm', body)
                                               .bind('click', _handleRequest)
@@ -195,7 +196,6 @@
                                           .find('form')
                                               .data(_virtualBrowser+'Elm', body)
                                               .bind('submit', _handleRequest);
-                                      body.trigger(_VBloaded, { url: request.url, elm: request.elm });
                                     }
                                   }
                       });
