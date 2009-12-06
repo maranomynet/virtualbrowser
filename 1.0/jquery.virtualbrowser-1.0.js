@@ -1,4 +1,12 @@
 // encoding: utf-8
+// ----------------------------------------------------------------------------------
+// jQuery.fn.virtualBrowser v 1.0
+// ----------------------------------------------------------------------------------
+// (c) 2009 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
+//  written by:
+//   * Már Örlygsson        -- http://mar.anomy.net
+// ----------------------------------------------------------------------------------
+
 /*
   jQuery.fn.virtualBrowser();
     Turns any element into a virtual browser window (or iframe), attempting to
@@ -83,7 +91,7 @@
 
 (function($, undefined){
 
-  // FIXME: remove this when
+  // FIXME: remove this when jQuery 1.4 is out
   $.fn.detach = $.fn.detach || function(){
       return this.each(function(){
           var parent = this.parentNode;
