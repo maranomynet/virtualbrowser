@@ -104,6 +104,7 @@
   var _docLoc            = document.location,
       _isDefaultPrevented = 'isDefaultPrevented',  // ...to save bandwidth
       _stopPropagation    = 'stopPropagation',     // ...to save bandwidth
+      _passThrough        = 'passThrough',         // ...to save bandwidth
       _virtualBrowser     = 'virtualBrowser',      // ...to save bandwidth
       _VBbeforeload       = 'VBbeforeload',        // ...to save bandwidth
       _VBload             = 'VBload',              // ...to save bandwidth
@@ -118,8 +119,8 @@
               var elm = typeof url != 'string' ? $(url) : undefined,
                   body = $(this),
                   config = body.data(_virtualBrowser).cfg,
-                  ev1 = $.Event(_VBbeforeload), 
-                  ev2, ev3,
+                  evBeforeload = $.Event(_VBbeforeload), 
+                  evLoad, evLoaded,
                   loadmsgMode = config.loadmsgMode,
                   request = { elm: elm };
 
@@ -133,15 +134,15 @@
 
               if (url)
               {
-                ev1[_stopPropagation]();
-                body.trigger(ev1, request);
+                evBeforeload[_stopPropagation]();
+                body.trigger(evBeforeload, request);
                 // trap external (non-AJAXable) URLs or links targeted at another window and set .passThrough as true
                 if (  // if passThrough is already set, then there's not need for further checks, and...
-                      !ev1.passThrough &&
+                      !evBeforeload[_passThrough] &&
                       (
                         (
                           // if event handler hasn't explicitly set passThrough to false
-                          ev1.passThrough === undefined  &&  
+                          evBeforeload[_passThrough] === undefined  &&  
                           // and elm is defined, and is `target`ted at an external window  // IDEA: allow named virtualBrowsers to target and trigger 'open' actions on eachother
                           elm  &&  elm[0].target  &&  elm[0].target != window.name
                         ) 
@@ -154,12 +155,12 @@
                       )
                     )
                 {
-                  ev1.passThrough = true;
+                  evBeforeload[_passThrough] = true;
                 }
                 // virtualBrowser should not handle .passThrough events.
-                ev1.passThrough  &&  ev1.preventDefault();
+                evBeforeload[_passThrough]  &&  evBeforeload.preventDefault();
 
-                if ( !ev1[_isDefaultPrevented]() )
+                if ( !evBeforeload[_isDefaultPrevented]() )
                 {
                   var params = config.params,
                       cache = request.noCache,
@@ -192,25 +193,25 @@
                                               [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
                                               [_replace](/`<<`>>/g,  'https://');  // Unescape "https://" back to normal
                                     request.result = txt;
-                                    ev2 = $.Event(_VBload);
-                                    ev2[_stopPropagation]();
-                                    body.trigger(ev2, request);
-                                    if ( !ev2[_isDefaultPrevented]() )
+                                    evLoad = $.Event(_VBload);
+                                    evLoad[_stopPropagation]();
+                                    body.trigger(evLoad, request);
+                                    if ( !evLoad[_isDefaultPrevented]() )
                                     {
-                                      ev3 = $.Event(_VBloaded);
-                                      ev3[_stopPropagation]();
+                                      evLoaded = $.Event(_VBloaded);
+                                      evLoaded[_stopPropagation]();
                                       config.loadmsgElm.detach();
                                       body
                                           .empty()
                                           .append( request.resultDOM || $.getResultBody(request.result)[0].childNodes )
-                                          .trigger(ev3, { url: request.url, elm: request.elm })
+                                          .trigger(evLoaded, { url: request.url, elm: request.elm })
                                           .find('[href]')
                                               .data(_virtualBrowser+'Elm', body)
                                               .bind('click', _handleRequest)
                                           .end()
                                           .find('form')
                                               .data(_virtualBrowser+'Elm', body)
-                                              .bind('submit', _handleRequest);
+                                              .bind('submit', _handleRequestOnElm);
                                     }
                                   }
                       });
@@ -221,21 +222,21 @@
                   }
                 }
               }
-              return ev1;
+              return evBeforeload;
             }
 
         },
 
 
 
-      _handleRequest = function (e) {
+      _handleRequestOnElm = function (e) {
           if ( !e[_isDefaultPrevented]() )
           {
             var elm = this,
                 VBbody = $(elm).data(_virtualBrowser+'Elm') || this;
                 bfloadEv = _methods['load'].call(VBbody, elm);
             bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
-            !bfloadEv.passThrough && e.preventDefault();
+            !bfloadEv[_passThrough] && e.preventDefault();
           }
         },
 
