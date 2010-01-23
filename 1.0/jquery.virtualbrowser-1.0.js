@@ -205,11 +205,11 @@
                                           .empty()
                                           .append( request.resultDOM || $.getResultBody(request.result)[0].childNodes )
                                           .trigger(evLoaded, { url: request.url, elm: request.elm })
-                                          .find('[href]')
-                                              .data(_virtualBrowser+'Elm', body)
-                                              .bind('click', _handleRequest)
-                                          .end()
+                                          // Depend on 'click' events bubbling up to the virtualBrowser `body` to allow event-delegation and click-bubbling within the `body`
+                                          // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by VB.
+                                          .bind('click', _handleClickOnBody)
                                           .find('form')
+                                              // NOTE for next version: by requiring jQuery 1.4 we could depend on 'submit' events bubbling up to the `body`
                                               .data(_virtualBrowser+'Elm', body)
                                               .bind('submit', _handleRequestOnElm);
                                     }
@@ -227,13 +227,20 @@
 
         },
 
-
+      _handleClickOnBody = function (e) {
+          var link = $(e.target).closest('[href]');
+          if (link[0])
+          {
+            e.VBbody = this;
+            _handleRequestOnElm.call(link, e);
+          }
+        },
 
       _handleRequestOnElm = function (e) {
           if ( !e[_isDefaultPrevented]() )
           {
             var elm = this,
-                VBbody = $(elm).data(_virtualBrowser+'Elm') || this;
+                VBbody = e.VBbody || $(elm).data(_virtualBrowser+'Elm') || this;
                 bfloadEv = _methods['load'].call(VBbody, elm);
             bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
             !bfloadEv[_passThrough] && e.preventDefault();
