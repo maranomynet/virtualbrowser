@@ -58,6 +58,8 @@
                               request  // Object: {
                                        //   result:     // String: The $.ajax()/$.get() callback responseText parameter (Read by handler)
                                        //   resultDOM:  // Element(s)/Collection to insert into the virtualBrowser body  (Set by handler)
+                                       //   xhr:        // The XMLHTTPRequest object
+                                       //   status:     // The friendly status msg returned by .ajax Complete callback (i.e. "notmodified", "success", "error", "timeout", etc.)
                                        //   url:  // String the URL that was just loaded
                                        //   elm:  // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
                                        // }
@@ -175,7 +177,7 @@
                       data: params,
                       type: method,
                       cache: cache !== undefined ? cache : !config.noCache,
-                      complete:  function (xhr) {
+                      complete:  function (xhr, status) {
                                     // Example: request.url == 'http://foo.com/path/file?bar=1#anchor'
                                     var fileUrl = request.url.split('#')[0],                              // 'http://foo.com/path/file?bar=1'
                                         filePart = fileUrl[_replace](/([^?]*\/)?(.*)/, '$2'),              // file?bar=1
@@ -193,6 +195,8 @@
                                               [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
                                               [_replace](/`<<`>>/g,  'https://');  // Unescape "https://" back to normal
                                     request.result = txt;
+                                    request.xhr = xhr;
+                                    request.status = status;
                                     evLoad = $.Event(_VBload);
                                     evLoad[_stopPropagation]();
                                     body.trigger(evLoad, request);
