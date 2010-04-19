@@ -101,6 +101,26 @@
         });
     };
 
+  // make all relative URLs explicitly Absolute - based on a base URL
+  $.injectBaseHrefToHtml = function (html, url) {
+      // Example: url == 'http://foo.com/path/file?bar=1#anchor'
+      var fileUrl = url.split('#')[0],                                      // 'http://foo.com/path/file?bar=1'
+          filePart = fileUrl[_replace](/([^?]*\/)?(.*)/, '$2'),              // file?bar=1
+          pathPrefix = fileUrl.split('?')[0][_replace](/(.*\/)?.*/, '$1'),  // 'http://foo.com/path/'
+          hasQuery = /\?/.test(fileUrl);                                     // fileUrl contains a queryString
+
+      hasQuery  &&  ( html = html[_replace](/(['"])\?/gi, '$1¨<<`>>') ); // Escape "? and '? (potential urls starting with a queryString)
+      html =  html[_replace](/(<[^>]+ (href|src|action)=["'])(["'#¨])/gi, '$1'+filePart+'$3'); // prepend all empty/localpage urls with filePart
+      hasQuery  &&  ( html =  html[_replace](/(['"])¨<<`>>/gi, '$1?') // Unescape all unaffected "? and '? pairs back to normal
+                                [_replace](/¨<<`>>/gi, '&amp;') );  // Transform affected (all other) ? symbols into &amp;
+      html =  html[_replace](/http:\/\//gi, '^<<`>>')  // Escape all "http://" (potential URLs) for easy, cross-browser RegExp detection 
+                [_replace](/https:\/\//gi, '`<<`>>') // Escape all "https://" (potential URLs) for easy, cross-browser RegExp detection 
+                [_replace](/(<[^>]+ (href|src|action)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3') // prepend pathPrefix to all relative URLs (not starting with `/`, `//`, `(https://) or ^(http://)
+                [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
+                [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
+                [_replace](/`<<`>>/g,  'https://');  // Unescape "https://" back to normal
+      return html;
+    };
 
 
   var _docLoc            = document.location,
@@ -178,23 +198,7 @@
                       type: method,
                       cache: cache !== undefined ? cache : !config.noCache,
                       complete:  function (xhr, status) {
-                                    // Example: request.url == 'http://foo.com/path/file?bar=1#anchor'
-                                    var fileUrl = request.url.split('#')[0],                              // 'http://foo.com/path/file?bar=1'
-                                        filePart = fileUrl[_replace](/([^?]*\/)?(.*)/, '$2'),              // file?bar=1
-                                        pathPrefix = fileUrl.split('?')[0][_replace](/(.*\/)?.*/, '$1'),  // 'http://foo.com/path/'
-                                        hasQuery = /\?/.test(fileUrl),                                     // fileUrl contains a queryString
-                                        txt = xhr.responseText;
-                                    hasQuery  &&  ( txt = txt[_replace](/(['"])\?/gi, '$1¨<<`>>') ); // Escape "? and '? (potential urls starting with a queryString)
-                                    txt =  txt[_replace](/(<[^>]+ (href|src|action)=["'])(["'#¨])/gi, '$1'+filePart+'$3'); // prepend all empty/localpage urls with filePart
-                                    hasQuery  &&  ( txt =  txt[_replace](/(['"])¨<<`>>/gi, '$1?') // Unescape all unaffected "? and '? pairs back to normal
-                                                              [_replace](/¨<<`>>/gi, '&amp;') );  // Transform affected (all other) ? symbols into &amp;
-                                    txt =  txt[_replace](/http:\/\//gi, '^<<`>>')  // Escape all "http://" (potential URLs) for easy, cross-browser RegExp detection 
-                                              [_replace](/https:\/\//gi, '`<<`>>') // Escape all "https://" (potential URLs) for easy, cross-browser RegExp detection 
-                                              [_replace](/(<[^>]+ (href|src|action)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3') // prepend pathPrefix to all relative URLs (not starting with `/`, `//`, `(https://) or ^(http://)
-                                              [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
-                                              [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
-                                              [_replace](/`<<`>>/g,  'https://');  // Unescape "https://" back to normal
-                                    request.result = txt;
+                                    request.result = $.injectBaseHrefToHtml(xhr.responseText, request.url);
                                     request.xhr = xhr;
                                     request.status = status;
                                     evLoad = $.Event(_VBload);
