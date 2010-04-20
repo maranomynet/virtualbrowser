@@ -106,19 +106,17 @@
       // Example: url == 'http://foo.com/path/file?bar=1#anchor'
       var fileUrl = url.split('#')[0],                                      // 'http://foo.com/path/file?bar=1'
           filePart = fileUrl[_replace](/([^?]*\/)?(.*)/, '$2'),              // file?bar=1
-          pathPrefix = fileUrl.split('?')[0][_replace](/(.*\/)?.*/, '$1'),  // 'http://foo.com/path/'
-          hasQuery = /\?/.test(fileUrl);                                     // fileUrl contains a queryString
+          pathPrefix = fileUrl.split('?')[0][_replace](/(.*\/)?.*/, '$1');  // 'http://foo.com/path/'
 
-      hasQuery  &&  ( html = html[_replace](/(['"])\?/gi, '$1¨<<`>>') ); // Escape "? and '? (potential urls starting with a queryString)
-      html =  html[_replace](/(<[^>]+ (href|src|action)=["'])(["'#¨])/gi, '$1'+filePart+'$3'); // prepend all empty/localpage urls with filePart
-      hasQuery  &&  ( html =  html[_replace](/(['"])¨<<`>>/gi, '$1?') // Unescape all unaffected "? and '? pairs back to normal
-                                [_replace](/¨<<`>>/gi, '&amp;') );  // Transform affected (all other) ? symbols into &amp;
-      html =  html[_replace](/http:\/\//gi, '^<<`>>')  // Escape all "http://" (potential URLs) for easy, cross-browser RegExp detection 
-                [_replace](/https:\/\//gi, '`<<`>>') // Escape all "https://" (potential URLs) for easy, cross-browser RegExp detection 
-                [_replace](/(<[^>]+ (href|src|action)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3') // prepend pathPrefix to all relative URLs (not starting with `/`, `//`, `(https://) or ^(http://)
-                [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
-                [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
-                [_replace](/`<<`>>/g,  'https://');  // Unescape "https://" back to normal
+      html =  html
+                  [_replace](/(<[^>]+ (href|src|action)=["'])(["'#])/gi, '$1'+filePart+'$3') // prepend all empty/withinpage urls with filePart
+                  [_replace](/(<[^>]+ (href|src|action)=["'])\?/gi, '$1'+filePart.split('?')[0]+'?') // prepend all samepage querystring URLs ("?baz=1") with just the filename
+                  [_replace](/http:\/\//gi, '^<<`>>')  // Escape all "http://" (potential URLs) for easy, cross-browser RegExp detection 
+                  [_replace](/https:\/\//gi, '`<<`>>') // Escape all "https://" (potential URLs) for easy, cross-browser RegExp detection 
+                  [_replace](/(<[^>]+ (href|src|action)=["'])([^\/`\^])/gi, '$1'+pathPrefix+'$3') // prepend pathPrefix to all relative URLs (not starting with `/`, `//`, `(https://) or ^(http://)
+                  [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
+                  [_replace](/\^<<`>>/g, 'http://')    // Unescape "http://" back to normal
+                  [_replace](/`<<`>>/g,  'https://');  // Unescape "https://" back to normal
       return html;
     };
 
