@@ -43,7 +43,7 @@
                           .after('<h4>'+h1Elm.text()+'</h4>')
                           .remove();
                     });
-                  request.resultDOM = $(dom[0].childNodes);
+                  request.resultDOM = $(dom.contents());
                 },
               onLoaded: function (e, request) {
                   $(this).append('<p>...append text on VBloaded.</p>');
