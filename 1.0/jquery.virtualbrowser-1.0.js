@@ -83,6 +83,7 @@
 
 
   TODO/ideas:
+    * gracefully handle button/:submit elements on "load" as well as clicks on form buttons inside the virtualBrowser
     * Offer the onLoad handlers a cleaned DOM (stripped of <scripts/>, <link/>, etc).
     * Remove dependency on eutils.
     * History buffer
