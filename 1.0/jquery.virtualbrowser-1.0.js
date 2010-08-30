@@ -79,6 +79,7 @@
 
   Methods:
     * 'load'     // .virtualBrowser('load', url);  // loads an url. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
+    * 'data'     // syntactic sugar method that returns .data('virtualBrowser')
 
 
 
@@ -136,11 +137,12 @@
           'load': function (url) {
               var elm = typeof url != 'string' ? $(url) : undefined,
                   body = $(this),
-                  config = body.data(_virtualBrowser).cfg,
+                  VBdata = body.data(_virtualBrowser),
+                  config = VBdata.cfg,
                   evBeforeload = $.Event(_VBbeforeload), 
                   evLoad, evLoaded,
                   loadmsgMode = config.loadmsgMode,
-                  request = { elm: elm };
+                  request = VBdata.lastRequest = { elm: elm };
 
               if (elm)
               {
@@ -227,6 +229,10 @@
                 }
               }
               return evBeforeload;
+            },
+            
+          'data': function () {
+              return $(this).data(_virtualBrowser);
             }
 
         },
