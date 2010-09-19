@@ -215,14 +215,7 @@
                                       body
                                           .empty()
                                           .append( request.resultDOM || $.getResultBody(request.result)[0].childNodes )
-                                          .trigger(evLoaded, { url: request.url, elm: request.elm })
-                                          // Depend on 'click' events bubbling up to the virtualBrowser `body` to allow event-delegation and click-bubbling within the `body`
-                                          // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by VB.
-                                          .bind('click', _handleClickOnBody)
-                                          .find('form')
-                                              // NOTE for next version: by requiring jQuery 1.4 we could depend on 'submit' events bubbling up to the `body`
-                                              .data(_virtualBrowser+'Elm', body)
-                                              .bind('submit', _handleRequestOnElm);
+                                          .trigger(evLoaded, { url: request.url, elm: request.elm });
                                     }
                                   }
                       });
@@ -242,23 +235,16 @@
 
         },
 
-      _handleClickOnBody = function (e) {
-          var link = $(e.target).closest('[href]');
-          if (link[0])
+      _handleHttpRequest = function (e) {
+          var elm = $(e.target).closest( e.type == 'click' ? '[href]' : 'form');
+          if (elm[0])
           {
-            e.VBbody = this;
-            _handleRequestOnElm.call(link, e);
-          }
-        },
-
-      _handleRequestOnElm = function (e) {
-          if ( !e[_isDefaultPrevented]() )
-          {
-            var elm = this,
-                VBbody = e.VBbody || $(elm).data(_virtualBrowser+'Elm') || this;
-                bfloadEv = _methods['load'].call(VBbody, elm);
-            bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
-            !bfloadEv[_passThrough] && e.preventDefault();
+            if ( !e[_isDefaultPrevented]() )
+            {
+              var bfloadEv = _methods['load'].call(this, elm);
+              bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
+              !bfloadEv[_passThrough] && e.preventDefault();
+            }
           }
         },
 
@@ -305,7 +291,10 @@
             }
 
             body
-                .data(_virtualBrowser, { cfg: config });
+                .data(_virtualBrowser, { cfg: config })
+                // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
+                // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
+                .bind( 'click submit', _handleHttpRequest);
 
             config.onLoad && body.bind(_VBload, config.onLoad);
             config.onLoaded && body.bind(_VBloaded, config.onLoaded);
