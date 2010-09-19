@@ -286,6 +286,7 @@
             args && (config.url = args);
             var body = this,
                 loadmsgElm = config.loadmsgElm || '<div class="loading" />',
+                // Automatically sniff the document language and choose a loading message accordingly - defaulting on English
                 loadmsg = (fnVB.i18n[body.closest('*[lang]').attr('lang')] || {}).loading || fnVB.i18n.en.loading;
 
             if (loadmsgElm.charAt)
