@@ -8,38 +8,21 @@
   <script src="http://codecentre.eplica.is/jq/jquery-1.4-source.js"></script>
   <script src="jquery.virtualbrowser-1.1.js"></script>
   <script>
-    ;;;if(!window.console){var console={log:function(m){var d=document,e=d.createElement('div');e.style.textAlign='left';e.innerHTML = '<code><b>Console:</b> '+((m.join?m.join(', '):m)+'').replace(/</g,'&lt;')+'</code>';d.body.appendChild(e)}};console.warn=console.error=console.debug=console.info=console.log;}
-    ;;;jQuery.fn.log=function(){if(window.console){arguments.length&&console.log.call(console,arguments);console.log(this);}return this;}
-    ;;;log = function(param, msg){ msg && window.console && console.log(msg); window.console && console.log(param); return param; };
-    ;;;String.prototype.log = function(msg){ return log(this, msg); };
-
     jQuery(function($){
 
-      $('.VBwindow')
+      $('#VBwindow')
           .bind('click', function (e) {
-              log('.VBwindow got '+ e.type)
+              $('#log').append( '#VBwindow got '+ e.type +'\n' );
             });
 
-      $('.VBbody')
+      $('#VBbody')
           .virtualBrowser({
-              url: $('.VBbody a').attr('href'),
-
-            /* *
-              // Example of how relative URLs could be modified 
-              // (not needed as virtualBrowser plugin now handles relative URLs) 
-              onBeforeload: function (e, request) {
-                  if ( !/(^|\/)demo\/([^\/]+\.html)$/i.test(request.url) ) {
-                    request.url = request.url.replace(/([^\/]+\.html)$/i, 'demo/$1');
-                  }
-                },
-                /* */
-
+              url: $('#VBbody a').attr('href'),
               onLoad: function (e, request) {
                   var dom = $.getResultBody( request.result );
                   dom.find('h1').each(function(i, h1Elm){
-                      h1Elm = $(h1Elm);
-                      h1Elm
-                          .after('<h4>'+h1Elm.text()+'</h4>')
+                      $(h1Elm)
+                          .after( '<h4>'+ $(h1Elm).text() +'</h4>' )
                           .remove();
                     });
                   request.resultDOM = $(dom.contents());
@@ -53,7 +36,7 @@
   </script>
 
   <style type="text/css">
-    .VBwindow {
+    #VBwindow {
       margin: 2em;
       width: 250px;
       background-color: #eee;
@@ -65,10 +48,13 @@
       font-size: 1em;
       margin: 0 0 3px 0;
     }
-    .VBbody {
+    #VBbody {
       background-color: #fff;
       border: 1px solid #ddd;
       padding: 5px 10px;
+    }
+    #log {
+      color: #999;
     }
   </style>
 
@@ -76,14 +62,14 @@
 <body>
   <h1>jQuery.virtualBrowser</h1>
 
-  <div class="VBwindow">
+  <div id="VBwindow">
     <h3>Window Title</h3>
-    <div class="VBbody">
+    <div id="VBbody">
       <p>Nothing here yet! <a href="demo/1.html">Click.</a></p>
     </div>
   </div>
 
-
+  <pre id="log"></pre>
 
 </body>
 </html>
