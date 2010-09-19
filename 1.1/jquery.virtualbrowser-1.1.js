@@ -116,7 +116,7 @@
       html =  html
                   [_replace](/(<[^>]+ (href|src|action)=["'])(["'#])/gi, '$1'+filePart+'$3') // prepend all empty/withinpage urls with filePart
                   [_replace](/(<[^>]+ (href|src|action)=["'])\?/gi, '$1'+filePart.split('?')[0]+'?') // prepend all samepage querystring URLs ("?baz=1") with just the filename
-                  [_replace](/(["'])([a-z]{3,12}:)/gi, '$1`<<`>>$2') // Escape all protocol names (potential URLs) for easy, cross-browser RegExp detection 
+                  [_replace](/(["'])([a-z]{3,12}:)/gi, '$1`<<`>>$2') // Escape all protocol names (potential URLs) for easy, cross-browser RegExp detection
                   [_replace](/(<[^>]+ (href|src|action)=["'])([^\/`])/gi, '$1'+pathPrefix+'$3') // prepend pathPrefix to all relative URLs (not starting with `/`, `//`, ` ({protocol}:)
                   [_replace](/\`<<`>>/g, ''); // Unescape "protocol" back to normal
       return html;
@@ -155,7 +155,7 @@
                   body = $(this),
                   VBdata = body.data(_virtualBrowser),
                   config = VBdata.cfg,
-                  evBeforeload = $.Event(_VBbeforeload), 
+                  evBeforeload = $.Event(_VBbeforeload),
                   evLoad, evLoaded,
                   loadmsgMode = config.loadmsgMode,
                   request = { elm: elm };
@@ -178,10 +178,10 @@
                       (
                         (
                           // if event handler hasn't explicitly set passThrough to false
-                          evBeforeload[_passThrough] === undefined  &&  
+                          evBeforeload[_passThrough] === undefined  &&
                           // and elm is defined, and is `target`ted at an external window  // IDEA: allow named virtualBrowsers to target and trigger 'open' actions on eachother
                           elm  &&  elm[0].target  &&  elm[0].target != window.name
-                        ) 
+                        )
                           || // ...or...
                         (
                           /^([a-z]{3,12}:|\/\/)/i.test(url)  &&  // the URL starts with a protocol (as well as "protocol-neutral" URLs (//host.com/).)
@@ -254,12 +254,13 @@
               }
               return evBeforeload;
             },
-            
+
           'data': function () {
               return $(this).data(_virtualBrowser);
             }
 
         },
+
 
       _handleHttpRequest = function (e) {
           var elm = $(e.target).closest(
@@ -305,12 +306,12 @@
           {
             config = $.extend(
                     {
-                      //url:         null,                      // String: Initial URL for the frame
-                      //noCache:     false,                     // Boolean: Controls the $.ajax() cache option
-                      //params:      null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
+                      //url:          null,                     // String: Initial URL for the frame
+                      //noCache:      false,                    // Boolean: Controls the $.ajax() cache option
+                      //params:       null,                     // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
                       //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
-                      //onLoad:      null,                      // Function: Shorthand for .bind('VBload' handler);
-                      //onLoaded:    null,                      // Function: Shorthand for .bind('VBloaded' handler);
+                      //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
+                      //onLoaded:     null,                     // Function: Shorthand for .bind('VBloaded' handler);
                       //loadmsgElm:  '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
                       loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
                     },
@@ -338,12 +339,12 @@
                 // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
                 .bind( 'click submit', _handleHttpRequest);
 
-            config.onLoad && body.bind(_VBload, config.onLoad);
-            config.onLoaded && body.bind(_VBloaded, config.onLoaded);
-            config.onBeforeload && body.bind(_VBbeforeload, config.onBeforeload);
-            config.params =  typeof config.params == 'string' ?
-                              config.params:
-                              $.param(config.params||{});
+            config.onLoad  &&  body.bind(_VBload, config.onLoad);
+            config.onLoaded  &&  body.bind(_VBloaded, config.onLoaded);
+            config.onBeforeload  &&  body.bind(_VBbeforeload, config.onBeforeload);
+            config.params = typeof config.params == 'string' ?
+                                config.params:
+                                $.param(config.params||{});
 
             config.url  &&  body[_virtualBrowser]('load', config.url)
           }
