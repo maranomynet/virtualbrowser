@@ -15,8 +15,7 @@
     virtualBrowser element (the semantic equivalient of a browser's <body>).
 
   Requires:
-    * jQuery 1.3.3+
-    * eutils 1.0     ( $.getResultBody() )
+    * jQuery 1.4.2+
 
 
   Usage/Init:
@@ -95,14 +94,6 @@
 
 (function($, undefined){
 
-  // FIXME: remove this when jQuery 1.4 is out
-  $.fn.detach = $.fn.detach || function(){
-      return this.each(function(){
-          var parent = this.parentNode;
-          parent  &&  parent.nodeType==1  &&  parent.removeChild(this);
-        });
-    };
-
   // make all relative URLs explicitly Absolute - based on a base URL
   $.injectBaseHrefToHtml = function (html, url) {
       // Example: url == 'http://foo.com/path/file?bar=1#anchor'
@@ -119,6 +110,18 @@
       return html;
     };
 
+  // Turns `$.get`/`$.ajax` responseText HTML document source into a DOM tree, wrapped in a `<div/>` element for easy `.find()`ing
+  // Stripping out all nasty `<script>`s and such things.
+  $.getResultBody = function (responseText) {
+      //return $('<body/>').append( // <-- this seems to cause crashes in IE8. (Note: Crash doesn't seem to happen on first run)
+      return $('<div/>').append(
+                  $(responseText||[])
+                      .not('script,title,meta,link,style')
+                          .find('script,style')
+                              .remove()
+                          .end()
+                );
+    };
 
   var _docLoc            = document.location,
       _isDefaultPrevented = 'isDefaultPrevented',  // ...to save bandwidth
