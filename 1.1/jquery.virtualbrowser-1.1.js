@@ -83,12 +83,11 @@
 
 
   TODO/ideas:
-    * gracefully handle button/:submit elements on "load" as well as clicks on form buttons inside the virtualBrowser
-    * Offer the onLoad handlers a cleaned DOM (stripped of <scripts/>, <link/>, etc).
-    * Remove dependency on eutils.
+    * Gracefully handle button/input:submit elements on "load" as well as clicks on form buttons inside the virtualBrowser
     * History buffer
        * Add 'back' (and 'forward'?) methods
-    * Consider adding 'reload' method
+    * Consider adding 'reload' sugar method (Already possible via performing 'load' on the VBdata.lastRequest object).
+    * Consider rewriting $.injectBaseHrefToHtml() to use DOM-based methods instead of those crazy RegExps.
 
 */
 
@@ -96,6 +95,8 @@
 
   // make all relative URLs explicitly Absolute - based on a base URL
   $.injectBaseHrefToHtml = function (html, url) {
+      // WARNING: horrendous RegExp based HTML parsing follows...
+
       // Example: url == 'http://foo.com/path/file?bar=1#anchor'
       var fileUrl = url.split('#')[0],                                      // 'http://foo.com/path/file?bar=1'
           filePart = fileUrl[_replace](/([^?]*\/)?(.*)/, '$2'),              // file?bar=1
@@ -109,6 +110,7 @@
                   [_replace](/\`<<`>>/g, ''); // Unescape "protocol" back to normal
       return html;
     };
+
 
   // Turns `$.get`/`$.ajax` responseText HTML document source into a DOM tree, wrapped in a `<div/>` element for easy `.find()`ing
   // Stripping out all nasty `<script>`s and such things.
@@ -321,6 +323,7 @@
 
 
   fnVB.i18n = {
+      // FIXME: add more translations...
       en: { loading: 'Loading...' },
       is: { loading: 'Sæki gögn...' }
     }
