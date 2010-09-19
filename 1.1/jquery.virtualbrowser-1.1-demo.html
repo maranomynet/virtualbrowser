@@ -5,6 +5,13 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>jQuery.virtualBrowser</title>
+  <style type="text/css">
+    #VBwindow {  margin: 2em;  width: 250px;  background-color: #eee;  border: 1px solid #ccc;  padding: 3px 10px 10px 10px;  }
+    h3        {  font-family: sans-serif;  font-size: 1em;  margin: 0 0 3px 0;  }
+    #VBbody   {  background-color: #fff;  border: 1px solid #ddd;  padding: 5px 10px;  }
+    #log      {  color: #999;  }
+  </style>
+
   <script src="http://codecentre.eplica.is/jq/jquery-1.4-source.js"></script>
   <script src="jquery.virtualbrowser-1.1.js"></script>
   <script>
@@ -29,37 +36,15 @@
                 },
               onLoaded: function (e, request) {
                   $(this).append('<p>...append text on VBloaded.</p>');
+                  ;;;window.console&&console.dir( request );
                 }
             });
 
     });
   </script>
-
-  <style type="text/css">
-    #VBwindow {
-      margin: 2em;
-      width: 250px;
-      background-color: #eee;
-      border: 1px solid #ccc;
-      padding: 3px 10px 10px 10px;
-    }
-    h3 {
-      font-family: sans-serif;
-      font-size: 1em;
-      margin: 0 0 3px 0;
-    }
-    #VBbody {
-      background-color: #fff;
-      border: 1px solid #ddd;
-      padding: 5px 10px;
-    }
-    #log {
-      color: #999;
-    }
-  </style>
-
 </head>
 <body>
+
   <h1>jQuery.virtualBrowser</h1>
 
   <div id="VBwindow">

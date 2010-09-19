@@ -25,7 +25,8 @@
 
   Options:
     * url:           null,                      // String: Initial URL for the frame
-    * params:        null,                      // Object/String: Request data (as in $.get(url, data, callback) )
+    * params:        null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
+    * noCache:       null,                      // Boolean: Controls the $.ajax() cache option
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
     * onLoaded:      null,                      // Function: Shorthand for .bind('VBloaded', handler);
@@ -40,54 +41,61 @@
 
 
   Events:
-    * 'VBbeforeload'   // .bind('VBbeforeload', function (e, request) {
+    * 'VBbeforeload'  // Triggered before the $.ajax call.
+                      //  .bind('VBbeforeload', function (e, request) {
                               this  // the virtualBrowser body element
                               $(this).data('virtualBrowser').cfg  // config object
+                              $(this).data('virtualBrowser').lastRequest // the request object from the last 'load'
                               request  // Object: {
                                        //   url:  // String the URL that was just loaded (Modifiable by handler)
                                        //   elm:  // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
                                        // }
                               // Cancellable via e.preventDefault()
-                              // cancel caching of the request by setting `request.noCache == true;`
+                              // cancel caching of the request by explicitly setting `request.noCache = true;`
                               // e.passThrough = true;  // Instructs the virtualBrowser to disable any click events and pass the click through to the web browser
                             });
-    * 'VBload'         // .bind('VBload', function (e, request) {
+    * 'VBload'        // Triggered after the $.ajax request has completed, *before* any DOM injection has taken place
+                      //  .bind('VBload', function (e, request) {
                               this  // the virtualBrowser body element
-                              $(this).data('virtualBrowser').cfg // config object
+                              $(this).data('virtualBrowser').cfg  // config object
+                              $(this).data('virtualBrowser').lastRequest // the request object from the last 'load'
                               request  // Object: {
                                        //   result:     // String: The $.ajax()/$.get() callback responseText parameter (Read by handler)
                                        //   resultDOM:  // Element(s)/Collection to insert into the virtualBrowser body  (Set by handler)
                                        //   xhr:        // The XMLHTTPRequest object
-                                       //   status:     // The friendly status msg returned by .ajax Complete callback (i.e. "notmodified", "success", "error", "timeout", etc.)
-                                       //   url:  // String the URL that was just loaded
-                                       //   elm:  // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
+                                       //   status:  // The friendly status msg returned by .ajax Complete callback (i.e. "notmodified", "success", "error", "timeout", etc.)
+                                       //   url:     // String the URL that was just loaded
+                                       //   params:  // String the contents of the $.ajax data property
+                                       //   method:  // String the method that was used (either "GET" or "POST")
+                                       //   noCache: // boolean (defaults to false)
+                                       //   elm:     // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
                                        // }
                               // Cancellable via e.preventDefault()
                             });
 
-    * 'VBloaded'         // .bind('VBloaded', function (e, request) {
+    * 'VBloaded'      // Triggered *after* the resultDOM has been injected into the virtualBrowser body. Think of it as `window.onload` of sorts.
+                      //  .bind('VBloaded', function (e, request) {
                               this  // the virtualBrowser body element
                               $(this).data('virtualBrowser').cfg // config object
+                              $(this).data('virtualBrowser').lastRequest // the *current* request object
                               request  // Object: {
-                                       //   url:  // String the URL that was just loaded
-                                       //   elm:  // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
+                                       // ...all the same properties as the 'VBload' event EXCEPT: `result`, `resultDOM` and `xhr`...
                                        // }
                               // Uncancellable!
                             });
 
 
   Methods:
-    * 'load'     // .virtualBrowser('load', url);  // loads an url. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
-    * 'data'     // syntactic sugar method that returns .data('virtualBrowser')
-
+    * 'load'    // .virtualBrowser('load', url);  // loads an url. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
+    * 'data'    // syntactic sugar method that returns .data('virtualBrowser') - an object containing:
+                //    cfg:          // the config object for his virtualBrowser
+                //    lastRequest:  // the request object used in the last 'load' action (updated just *before* 'VBloaded' is triggered)
 
 
   TODO/ideas:
-    * Gracefully handle button/input:submit elements on "load" as well as clicks on form buttons inside the virtualBrowser
-    * History buffer
-       * Add 'back' (and 'forward'?) methods
+    * Consider rewriting $.injectBaseHrefToHtml() to use DOM-based methods instead of those crazy RegExps. (See below.)
+    * Consider adding history buffer 'back' (and 'forward'?) methods
     * Consider adding 'reload' sugar method (Already possible via performing 'load' on the VBdata.lastRequest object).
-    * Consider rewriting $.injectBaseHrefToHtml() to use DOM-based methods instead of those crazy RegExps.
 
 */
 
@@ -96,6 +104,9 @@
   // make all relative URLs explicitly Absolute - based on a base URL
   $.injectBaseHrefToHtml = function (html, url) {
       // WARNING: horrendous RegExp based HTML parsing follows...
+      // I'm not sure, however, if it's even possible to do this via DOM methods -
+      // since the HTML to DOM conversion may mangle the relative URLs...
+      // Needs research.
 
       // Example: url == 'http://foo.com/path/file?bar=1#anchor'
       var fileUrl = url.split('#')[0],                                      // 'http://foo.com/path/file?bar=1'
@@ -147,7 +158,7 @@
                   evBeforeload = $.Event(_VBbeforeload), 
                   evLoad, evLoaded,
                   loadmsgMode = config.loadmsgMode,
-                  request = VBdata.lastRequest = { elm: elm };
+                  request = { elm: elm };
 
               if (elm)
               {
@@ -187,19 +198,28 @@
 
                 if ( !evBeforeload[_isDefaultPrevented]() )
                 {
-                  var params = config.params,
-                      cache = request.noCache,
-                      method;
+                  var noCache = request.noCache =  request.noCache !== undefined ? request.noCache : config.noCache,
+                      params = config.params || '',
+                      method = 'GET';
                   if (elm && elm.is('form'))
                   {
-                    params = elm.serialize() + '&' + params;
-                    method = elm.attr('method')||'GET';
+                    method = elm.attr('method') || method;
+                    params += '&' + elm.serialize();
+                    var clickedButton = VBdata._clickedBtn;
+                    if ( clickedButton )
+                    {
+                      params += '&'+ $.param( clickedButton );
+                      delete VBdata._clickedBtn
+                    }
                   }
+                  request.params = params;
+                  request.method = method;
+
                   $.ajax({
-                      url: request.url.split('#')[0],  // in case jQuery (or the Browser) chops this off before sending the request...
+                      url: request.url.split('#')[0],  // just to be safe :)
                       data: params,
                       type: method,
-                      cache: cache !== undefined ? cache : !config.noCache,
+                      cache: !noCache,
                       complete:  function (xhr, status) {
                                     request.result = $.injectBaseHrefToHtml(xhr.responseText, request.url);
                                     request.xhr = xhr;
@@ -214,8 +234,14 @@
                                       config.loadmsgElm.detach();
                                       body
                                           .empty()
-                                          .append( request.resultDOM || $.getResultBody(request.result)[0].childNodes )
-                                          .trigger(evLoaded, { url: request.url, elm: request.elm });
+                                          .append( request.resultDOM || $.getResultBody(request.result)[0].childNodes );
+                                      // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
+                                      delete request.resultDOM;
+                                      delete request.result;
+                                      delete request.xhr;
+                                      VBdata.lastRequest = request;
+                                      body
+                                          .trigger(evLoaded, request);
                                     }
                                   }
                       });
@@ -236,14 +262,30 @@
         },
 
       _handleHttpRequest = function (e) {
-          var elm = $(e.target).closest( e.type == 'click' ? '[href]' : 'form');
+          var elm = $(e.target).closest(
+                          e.type == 'click' ?
+                              '[href], input:submit, button:submit' :
+                              'form' // e.type == 'submit'
+                        );
           if (elm[0])
           {
             if ( !e[_isDefaultPrevented]() )
             {
-              var bfloadEv = _methods['load'].call(this, elm);
-              bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
-              !bfloadEv[_passThrough] && e.preventDefault();
+              if ( !elm.is(':submit') )
+              {
+                var bfloadEv = _methods['load'].call(this, elm);
+                bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
+                !bfloadEv[_passThrough] && e.preventDefault();
+              }
+              else if ( elm.is('[name]') )
+              {
+                var VBdata = $(this).data(_virtualBrowser);
+                // make note of which submit button was clicked.
+                VBdata._clickedBtn = elm;
+                // in case the 'submit' event on the form gets cancelled we need to guarantee that this value gets removed.
+                // A timeout should (theoretically at least) accomplish that.
+                setTimeout(function(){ delete VBdata._clickedBtn; }, 0);
+              }
             }
           }
         },
@@ -264,8 +306,8 @@
             config = $.extend(
                     {
                       //url:         null,                      // String: Initial URL for the frame
-                      //noCache:     false,                     // Controls the $.ajax() cache option 
-                      //params:      null,                      // Object/String: Request data (as in $.get(url, data, callback) )
+                      //noCache:     false,                     // Boolean: Controls the $.ajax() cache option
+                      //params:      null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
                       //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
                       //onLoad:      null,                      // Function: Shorthand for .bind('VBload' handler);
                       //onLoaded:    null,                      // Function: Shorthand for .bind('VBloaded' handler);
