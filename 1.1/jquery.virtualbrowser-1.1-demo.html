@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- encoding: utf-8 -->
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="is">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>jQuery.virtualBrowser</title>
+  <script src="http://codecentre.eplica.is/jq/jquery-1.3-source.js"></script>
+  <script src="../../eutils/1.1/jquery.eutils-1.1.js"></script>
+  <script src="jquery.virtualbrowser-1.1.js"></script>
+  <script>
+    ;;;if(!window.console){var console={log:function(m){var d=document,e=d.createElement('div');e.style.textAlign='left';e.innerHTML = '<code><b>Console:</b> '+((m.join?m.join(', '):m)+'').replace(/</g,'&lt;')+'</code>';d.body.appendChild(e)}};console.warn=console.error=console.debug=console.info=console.log;}
+    ;;;jQuery.fn.log=function(){if(window.console){arguments.length&&console.log.call(console,arguments);console.log(this);}return this;}
+    ;;;log = function(param, msg){ msg && window.console && console.log(msg); window.console && console.log(param); return param; };
+    ;;;String.prototype.log = function(msg){ return log(this, msg); };
+
+    jQuery(function($){
+
+      $('.VBwindow')
+          .bind('click', function (e) {
+              log('.VBwindow got '+ e.type)
+            });
+
+      $('.VBbody')
+          .virtualBrowser({
+              url: $('.VBbody a').attr('href'),
+
+            /* *
+              // Example of how relative URLs could be modified 
+              // (not needed as virtualBrowser plugin now handles relative URLs) 
+              onBeforeload: function (e, request) {
+                  if ( !/(^|\/)demo\/([^\/]+\.html)$/i.test(request.url) ) {
+                    request.url = request.url.replace(/([^\/]+\.html)$/i, 'demo/$1');
+                  }
+                },
+                /* */
+
+              onLoad: function (e, request) {
+                  var dom = $.getResultBody( request.result );
+                  dom.find('h1').each(function(i, h1Elm){
+                      h1Elm = $(h1Elm);
+                      h1Elm
+                          .after('<h4>'+h1Elm.text()+'</h4>')
+                          .remove();
+                    });
+                  request.resultDOM = $(dom.contents());
+                },
+              onLoaded: function (e, request) {
+                  $(this).append('<p>...append text on VBloaded.</p>');
+                }
+            });
+
+    });
+  </script>
+
+  <style type="text/css">
+    .VBwindow {
+      margin: 2em;
+      width: 250px;
+      background-color: #eee;
+      border: 1px solid #ccc;
+      padding: 3px 10px 10px 10px;
+    }
+    h3 {
+      font-family: sans-serif;
+      font-size: 1em;
+      margin: 0 0 3px 0;
+    }
+    .VBbody {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      padding: 5px 10px;
+    }
+  </style>
+
+</head>
+<body>
+  <h1>jQuery.virtualBrowser</h1>
+
+  <div class="VBwindow">
+    <h3>Window Title</h3>
+    <div class="VBbody">
+      <p>Nothing here yet! <a href="demo/1.html">Click.</a></p>
+    </div>
+  </div>
+
+
+
+</body>
+</html>
