@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- encoding: utf-8 -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="is">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>3</title>
+</head>
+<body>
+
+  <h1>demo/3.html</h1>
+  <p>
+    VirtualBrowser will not load links/forms if they have jQuery <code>click</code>/<code>submit</code> events handlers that <code>return false</code> (or called <code>event.preventDefault()</code>)
+  </p>
+  <p>
+    Unfortunately, because of how event-delegation in jQuery works, <code>event.stopPropagation()</code> will also prevent virtualBrowser from doing its thing. 
+  </p>
+  <p>
+    Also, your browser's back and forward buttons won't work unless you use some sort of a history plugin.
+  </p>
+  <p>
+    <a href="../demo/page1.html" onclick="return false;">Link with <code>onclick="return false;"</code></a> (gets loaded anyway)
+  </p>
+  <p>
+    <a href="javascript:alert('Oy!');">Link with <code>javascript:</code> url</a>
+  </p>
+  <p>
+    P.S. here are some links back to <a href="../demo/page1.html">page1.html</a> and  <a href="../demo/page2.html">page2.html</a>
+  </p>
+
+</body>
+</html>

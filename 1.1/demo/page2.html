@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- encoding: utf-8 -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="is">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Demo Page 2</title>
+</head>
+<body>
+
+  <h1>demo/page2.html</h1>
+  <p>When forms are submitted the results appear inside the virtualBrowser 'body' element.</p>
+  <form action="page3.html">
+    <p>This form submits to page3.html.</p>
+    <input type="hidden" name="foo" value="bar" />
+    <input type="submit" value="Go to page3.html" />
+  </form>
+  <form action="">
+    <p>This form has an empty <code>action=""</code>.</p>
+    <input type="hidden" name="foo" value="bar" />
+    <input type="submit" value="Reload page2.html" />
+  </form>
+  <form action="page3.html">
+    <p>Submit buttons with <code>name=""</code> attributes are gracefully submitted when clicked.</p>
+    <input type="hidden" name="foo" value="bar" />
+    <input type="submit" name="btn" value="'name'd submit button" />
+    <input type="submit" name="btn2" value="Also 'name'd" />
+  </form>
+  <form action="" target="foobar">
+    <p>Forms with <code>target=""</code> attributes submit normally and may open new windows/tabs</p>
+    <input type="hidden" name="foo" value="bar" />
+    <input type="submit" name="btn3" value='target="foobar"' />
+  </form>
+
+</body>
+</html>

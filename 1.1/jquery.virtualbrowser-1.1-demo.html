@@ -6,10 +6,18 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>jQuery.virtualBrowser</title>
   <style type="text/css">
-    #VBwindow {  margin: 2em;  width: 250px;  background-color: #eee;  border: 1px solid #ccc;  padding: 3px 10px 10px 10px;  }
-    h3        {  font-family: sans-serif;  font-size: 1em;  margin: 0 0 3px 0;  }
-    #VBbody   {  background-color: #fff;  border: 1px solid #ddd;  padding: 5px 10px;  }
-    #log      {  color: #999;  }
+    body       {  font-family: Arial, sans-serif;  }
+    .wchrome   {  float: left;  margin: 1em 0 2em 2em;  width: 300px;  background-color: #eee;  border: 1px solid #ccc;  padding: 3px 10px 10px 10px;  }
+    .ifrchrome {}
+    iframe,
+    #VBbody    {  background-color: #fff;  border: 1px solid #ddd;  padding: 5px 10px;  }
+    iframe     {  width: 100%;  padding: 0;  }
+    #log       {  clear:both; color: #999;  }
+    h2         {  font-family: sans-serif;  font-size: 1em;  margin: 0 0 3px 0;  }
+    p          {  margin-top: 0;  }
+    code       {  font-size: 1.1em;  font-size-adjust: .5;  }
+    form       {  border: 1px dashed #ddd;  padding: 5px;  margin: -5px -2px 1em -2px;  }
+    form p     {  margin-bottom: .25em;  }
   </style>
 
   <script src="http://codecentre.eplica.is/jq/jquery-1.4-source.js"></script>
@@ -17,26 +25,28 @@
   <script>
     jQuery(function($){
 
-      $('#VBwindow')
-          .bind('click', function (e) {
-              $('#log').append( '#VBwindow got '+ e.type +'\n' );
-            });
-
       $('#VBbody')
           .virtualBrowser({
               url: $('#VBbody a').attr('href'),
               onLoad: function (e, request) {
+                  // $.getResultBody() helps us by stripping out <script>, <meta>, 
+                  // <title>, <link> and <style> tags from the ajax request.result ,
+                  // and wraps the remains in a <div> for easier .find()ing.
                   var dom = $.getResultBody( request.result );
-                  dom.find('h1').each(function(i, h1Elm){
-                      $(h1Elm)
-                          .after( '<h4>'+ $(h1Elm).text() +'</h4>' )
+                  // change the incoming <h1>s to <h3>
+                  dom.find('h1').each(function () {
+                      var h1Elm = $(this);
+                      h1Elm
+                          .after( '<h3>'+ h1Elm.text() +'</h3>' )
                           .remove();
                     });
-                  request.resultDOM = $(dom.contents());
+                  // set the dom contents as resultDOM
+                  request.resultDOM = $( dom.contents() );
                 },
               onLoaded: function (e, request) {
-                  $(this).append('<p>...append text on VBloaded.</p>');
-                  ;;;window.console&&console.dir( request );
+                  $(this).append('<p><small>(text added on the <code>VBloaded</code> event.)</small></p>');
+                  window.console&&console.log( 'The virtualBrowser request:' )
+                  window.console&&console.dir&&console.dir( request );
                 }
             });
 
@@ -47,11 +57,18 @@
 
   <h1>jQuery.virtualBrowser</h1>
 
-  <div id="VBwindow">
-    <h3>Window Title</h3>
+  <div class="wchrome" id="VBwindow">
+    <h2>Virtual Browsing inside a <code>&lt;div></code>:</h2>
     <div id="VBbody">
-      <p>Nothing here yet! <a href="demo/1.html">Click.</a></p>
+      <p>Nothing here yet! <a href="demo/page1.html">Go to page1.html</a></p>
     </div>
+  </div>
+
+  <div class="wchrome ifrchrome">
+    <h2>Browsing in an <code>&lt;frame></code>:</h2>
+    <iframe src="demo/page1.html" height="300" scrolling="auto">
+      Alernate content. <a href="demo/page1.html">Go to page1.html</a></p>
+    </iframe>
   </div>
 
   <pre id="log"></pre>
