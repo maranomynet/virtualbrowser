@@ -11,8 +11,8 @@
   jQuery.fn.virtualBrowser();
     Turns any element into a virtual browser window (or iframe), attempting to
     capture all link-clicks and form submits and convert them into ajax-requests,
-    and then inserting (and manipulating) the response document into the
-    virtualBrowser element (the semantic equivalient of a browser's <body>).
+    and then (and manipulating) inserting the response document into the
+    virtualBrowser element (which is the semantic equivalient of a real browser's <body>).
 
   Requires:
     * jQuery 1.4.2+
@@ -20,11 +20,11 @@
 
   Usage/Init:
     * $('#popupBody').virtualBrowser(options);
-    * $('#popupBody').virtualBrowser(options, url);  // initial ('home') URL.
+    * $('#popupBody').virtualBrowser(options, url);  // initial URL to load.
 
 
   Options:
-    * url:           null,                      // String: Initial URL for the frame
+    * url:           null,                      // String|linkElm|formElm|collection: Initial URL for the frame (Uses the 'href' or 'action' attributes in case elements were passed.)
     * params:        null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
     * noCache:       null,                      // Boolean: Controls the $.ajax() cache option
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
@@ -86,7 +86,7 @@
 
 
   Methods:
-    * 'load'    // .virtualBrowser('load', url|linkElm|formElm);  // loads an url (or the 'href' or 'action' attributes of an element) inside the virtualBrwoser 'body' element. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
+    * 'load'    // .virtualBrowser('load', url|linkElm|formElm|collection);  // loads an url (or the 'href' or 'action' attributes of an element) inside the virtualBrwoser 'body' element. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
     * 'data'    // syntactic sugar method that returns .data('virtualBrowser') - an object containing:
                 //    cfg:          // the config object for his virtualBrowser
                 //    lastRequest:  // the request object used in the last 'load' action (updated just *before* 'VBloaded' is triggered)
@@ -95,6 +95,8 @@
   TODO/ideas:
     * Consider rewriting $.injectBaseHrefToHtml() to use DOM-based methods instead of those crazy RegExps. (See below.)
     * Consider adding history buffer 'back' (and 'forward'?) methods
+        * and an off-by-default 'storeDomWithHistory' option that would store the previous DOM states as-is (with events, data and all) in the history buffer.
+        * and 'request' method to retrieve requests from a history buffer.
     * Consider adding 'reload' sugar method (Already possible via performing 'load' on the VBdata.lastRequest object).
 
 */
