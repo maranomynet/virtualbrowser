@@ -2,16 +2,19 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.virtualBrowser v 1.1
 // ----------------------------------------------------------------------------------
-// (c) 2010 Hugsmiðjan ehf  -- http://www.hugsmidjan.is
-//  written by:
-//   * Már Örlygsson        -- http://mar.anomy.net
+// Copyright 2010
+//   Hugsmiðjan ehf. (http://www.hugsmidjan.is)  &
+//   Már Örlygsson  (http://mar.anomy.net/)
+//
+// Dual licensed under a MIT licence (http://en.wikipedia.org/wiki/MIT_License)
+// and GPL 2.0 or above (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
 // ----------------------------------------------------------------------------------
 
 /*
   jQuery.fn.virtualBrowser();
     Turns any element into a virtual browser window (or iframe), attempting to
     capture all link-clicks and form submits and convert them into ajax-requests,
-    and then (and manipulating) inserting the response document into the
+    and then (manipulate and) insert the response document into the
     virtualBrowser element (which is the semantic equivalient of a real browser's <body>).
 
   Requires:
