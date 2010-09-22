@@ -86,7 +86,7 @@
 
 
   Methods:
-    * 'load'    // .virtualBrowser('load', url);  // loads an url. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
+    * 'load'    // .virtualBrowser('load', url|linkElm|formElm);  // loads an url (or the 'href' or 'action' attributes of an element) inside the virtualBrwoser 'body' element. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
     * 'data'    // syntactic sugar method that returns .data('virtualBrowser') - an object containing:
                 //    cfg:          // the config object for his virtualBrowser
                 //    lastRequest:  // the request object used in the last 'load' action (updated just *before* 'VBloaded' is triggered)
