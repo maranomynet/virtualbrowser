@@ -234,7 +234,7 @@
                                       config.loadmsgElm.detach();
                                       body
                                           .empty()
-                                          .append( request.resultDOM || $.getResultBody(request.result)[0].childNodes );
+                                          .append( request.resultDOM || $.getResultBody(request.result).contents() );
                                       // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
                                       delete request.resultDOM;
                                       delete request.result;
