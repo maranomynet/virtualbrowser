@@ -100,6 +100,7 @@
     * Consider adding history buffer 'back' (and 'forward'?) methods
         * and an off-by-default 'storeDomWithHistory' option that would store the previous DOM states as-is (with events, data and all) in the history buffer.
         * and 'request' method to retrieve requests from a history buffer.
+    * Make $.injectBaseHrefToHtml use pure DOM methods in modern browsers
     * Consider adding 'reload' sugar method (Already possible via performing 'load' on the VBdata.lastRequest object).
 
 */
@@ -107,11 +108,11 @@
 (function($, undefined){
 
   // make all relative URLs explicitly Absolute - based on a base URL
+  // FIXME: fork the code and use pure DOM methods in modern browsers  
   $.injectBaseHrefToHtml = function (html, url) {
       // WARNING: horrendous RegExp based HTML parsing follows...
-      // I'm not sure, however, if it's even possible to do this via DOM methods -
-      // since the HTML to DOM conversion may mangle the relative URLs...
-      // Needs research.
+      // Needed for IE6-8 since the HTML to DOM conversion mangles the relative URLs...
+      // (i.e. link.attr('href') reports a "resolved" URL - rather than the raw attribute value)
 
       // Example: url == 'http://foo.com/path/file?bar=1#anchor'
       var fileUrl = url.split('#')[0],                                      // 'http://foo.com/path/file?bar=1'

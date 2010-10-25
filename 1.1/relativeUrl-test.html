@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- encoding: utf-8 -->
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="is">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>.</title>
+  <script src="http://codecentre.eplica.is/jq/jquery-1.4.js"></script>  
+
+</head>
+<body>
+
+<div style="display: none;">
+  <div><a class="one"   href="url"    title="url"    >foobar</a></div>
+  <div><a class="two"   href=""       title=""       >foobar</a></div>
+  <div><a class="three" href="../url" title="../url" >foobar</a></div>
+  <div><a class="four"  href="#foo"   title="#foo"   >foobar</a></div>
+  <div><form class="one"   action="url"    title="url"    >foobar</form></div>
+  <div><form class="two"   action=""       title=""       >foobar</form></div>
+  <div><form class="three" action="../url" title="../url" >foobar</form></div>
+  <div><form class="four"  action="#foo"   title="#foo"   >foobar</form></div>
+  <div><img class="one"   src="url"    title="url"    /></div>
+  <div><img class="two"   src=""       title=""       /></div>
+  <div><img class="three" src="../url" title="../url" /></div>
+  <div><img class="four"  src="#foo"   title="#foo"   /></div>
+</div>
+
+ 
+<p>
+  <strong>Notes:</strong>
+  These tests seem to fail in IE6-IE8 when served over HTTP - and also when served locally in IE6 & 7.<br />
+  All other browsers seem to be fine.
+</p>
+
+
+<script>
+  var log = function(m){var d=document,e=d.createElement('div');e.style.textAlign='left';e.innerHTML = '<code>}'+((m.join?m.join(', '):m)+'').replace(/</g,'&lt;')+'</code>';d.body.appendChild(e)};
+
+  var a = [
+    /*  1 */ $('a.one'),
+    /*  2 */ $('a.two'),
+    /*  3 */ $('a.three'),
+    /*  4 */ $('a.four'),
+    /*  5 */ $('img.one'),
+    /*  6 */ $('img.two'),
+    /*  7 */ $('img.three'),
+    /*  8 */ $('img.four'),
+    /*  9 */ $('form.one'),
+    /* 10 */ $('form.two'),
+    /* 11 */ $('form.three'),
+    /* 12 */ $('form.four'),
+    /* 13 */ $('<div><a class="one"   href="url"    title="url"    >foobar</a></div>').find('a'),
+    /* 14 */ $('<div><a class="two"   href=""       title=""       >foobar</a></div>').find('a'),
+    /* 15 */ $('<div><a class="three" href="../url" title="../url" >foobar</a></div>').find('a'),
+    /* 16 */ $('<div><a class="four"  href="#foo"   title="#foo"   >foobar</a></div>').find('a'),
+    /* 17 */ $('<div><img class="one"   src="url"    title="url"    /></div>').find('img'),
+    /* 18 */ $('<div><img class="two"   src=""       title=""       /></div>').find('img'),
+    /* 19 */ $('<div><img class="three" src="../url" title="../url" /></div>').find('img'),
+    /* 20 */ $('<div><img class="four"  src="#foo"   title="#foo"   /></div>').find('img'),
+    /* 21 */ $('<div><form class="one"   action="url"    title="url"    >foobar</form></div>').find('form'),
+    /* 22 */ $('<div><form class="two"   action=""       title=""       >foobar</form></div>').find('form'),
+    /* 23 */ $('<div><form class="three" action="../url" title="../url" >foobar</form></div>').find('form'),
+    /* 24 */ $('<div><form class="four"  action="#foo"   title="#foo"   >foobar</form></div>').find('form')
+          ].reverse();
+  var i = a.length,
+      allOk = true;
+  while (i--)
+  {
+    var e = a[i],
+        expected = e.attr('title'),
+        tag = e[0].tagName,
+        attr = tag=='A'?
+                  'href':
+              tag=='FORM'?
+                  'action':
+              tag=='IMG'?
+                  'src':
+                  null;
+        isOk = e.attr(attr) == expected;
+    if ( !isOk )
+    {
+      allOk = false;
+    }
+    var ord = a.length-i;
+    var explanation  = !isOk ?
+      '  (Got "'+ e.attr(attr) +'" - Expected: "'+ expected +'")':
+      '';
+    log( ((ord<10?' ':'')+ord) + ') '+  isOk + explanation );
+  }
+
+  $('body').append('<br/>');
+
+  log( $('<a href="/foo">foobar</a>'  ).attr('href', function(i,v){ return '/blah/smu/'+v; })[0].href )
+  log( $('<a href="foo">foobar</a>'   ).attr('href', function(i,v){ return '/blah/smu/'+v; })[0].href )
+  log( $('<a href="./foo">foobar</a>' ).attr('href', function(i,v){ return '/blah/smu/'+v; })[0].href )
+  log( $('<a href="">foobar</a>'      ).attr('href', function(i,v){ return '/blah/smu/'+v; })[0].href )
+  log( $('<a href="../foo">foobar</a>').attr('href', function(i,v){ return '/blah/smu/'+v; })[0].href )
+
+</script>
+
+</body>
+</html>
