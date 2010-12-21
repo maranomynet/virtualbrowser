@@ -144,6 +144,7 @@
 
   var _docLoc            = document.location,
       _isDefaultPrevented = 'isDefaultPrevented',  // ...to save bandwidth
+      _preventDefault     = 'preventDefault',     // ...to save bandwidth
       _stopPropagation    = 'stopPropagation',     // ...to save bandwidth
       _passThrough        = 'passThrough',         // ...to save bandwidth
       _virtualBrowser     = 'virtualBrowser',      // ...to save bandwidth
@@ -200,7 +201,7 @@
                   evBeforeload[_passThrough] = true;
                 }
                 // virtualBrowser should not handle .passThrough events.
-                evBeforeload[_passThrough]  &&  evBeforeload.preventDefault();
+                evBeforeload[_passThrough]  &&  evBeforeload[_preventDefault]();
 
                 if ( !evBeforeload[_isDefaultPrevented]() )
                 {
@@ -281,8 +282,11 @@
               if ( !elm.is(':submit') )
               {
                 var bfloadEv = _methods['load'].call(this, elm);
-                bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
-                !bfloadEv[_passThrough] && e.preventDefault();
+                if ( !bfloadEv[_passThrough] )
+                {
+                  e[_preventDefault]();
+                  bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
+                }
               }
               else if ( elm.is('[name]') )
               {
