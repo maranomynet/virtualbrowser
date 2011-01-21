@@ -314,19 +314,7 @@
           }
           else
           {
-            config = $.extend(
-                    {
-                      //url:          null,                     // String: Initial URL for the frame
-                      //noCache:      false,                    // Boolean: Controls the $.ajax() cache option
-                      //params:       null,                     // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
-                      //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
-                      //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
-                      //onLoaded:     null,                     // Function: Shorthand for .bind('VBloaded' handler);
-                      //loadmsgElm:  '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
-                      loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
-                    },
-                    config || {}
-                  );
+            config =  $.extend({}, fnVB.defaults, config);
             args && (config.url = args);
             var body = this,
                 loadmsgElm = config.loadmsgElm || '<div class="loading" />',
@@ -363,6 +351,16 @@
         };
 
 
+  fnVB.defaults = {
+      //url:          null,                     // String: Initial URL for the frame
+      //noCache:      false,                    // Boolean: Controls the $.ajax() cache option
+      //params:       null,                     // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
+      //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
+      //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
+      //onLoaded:     null,                     // Function: Shorthand for .bind('VBloaded' handler);
+      //loadmsgElm:  '<div class="loading" />', // String/Element: Template for a loading message displayed while loading a URL
+      loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
+    };
 
   fnVB.i18n = {
       // FIXME: add more translations...
