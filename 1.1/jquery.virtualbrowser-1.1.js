@@ -246,9 +246,8 @@
                                       delete request.resultDOM;
                                       delete request.result;
                                       delete request.xhr;
+                                      body.trigger(evLoaded, request);
                                       VBdata.lastRequest = request;
-                                      body
-                                          .trigger(evLoaded, request);
                                     }
                                   }
                       });
