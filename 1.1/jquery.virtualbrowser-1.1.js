@@ -82,7 +82,7 @@
                               $(this).data('virtualBrowser').cfg // config object
                               $(this).data('virtualBrowser').lastRequest // the *current* request object
                               request  // Object: {
-                                       // ...all the same properties as the 'VBload' event EXCEPT: `result`, `resultDOM` and `xhr`...
+                                       // ...all the same properties as the 'VBload' event...
                                        // }
                               // Uncancellable!
                             });
@@ -239,15 +239,16 @@
                                       evLoaded = $.Event(_VBloaded);
                                       evLoaded[_stopPropagation]();
                                       config.loadmsgElm.detach();
+                                      request.resultDOM = request.resultDOM || $.getResultBody(request.result).contents();
                                       body
                                           .empty()
-                                          .append( request.resultDOM || $.getResultBody(request.result).contents() );
+                                          .append( request.resultDOM );
+                                      body.trigger(evLoaded, request);
+                                      VBdata.lastRequest = request;
                                       // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
                                       delete request.resultDOM;
                                       delete request.result;
                                       delete request.xhr;
-                                      body.trigger(evLoaded, request);
-                                      VBdata.lastRequest = request;
                                     }
                                   }
                       });
