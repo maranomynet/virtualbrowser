@@ -307,10 +307,16 @@
           var confIsString = typeof config == 'string';
           if (confIsString)
           {
-            var method = _methods[config];
-            method  &&  this.each(function(){
-                  method.apply( this, [].concat(args) );  // Normalize `args` into an array. ([].concat() does that :-)
+            var method = _methods[config],
+                retValue;
+            method  &&  this.each(function(i){
+                  var methodRet = method.apply( this, [].concat(args) );  // Normalize `args` into an array. ([].concat() does that :-)
+                  if (!i) { retValue = methodRet; }
                 });
+            if ( retValue !== undefined )
+            {
+              return retValue;
+            }
           }
           else
           {
@@ -346,7 +352,6 @@
 
             config.url  &&  body[_virtualBrowser]('load', config.url)
           }
-
           return this;
         };
 
