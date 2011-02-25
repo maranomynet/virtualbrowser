@@ -243,8 +243,8 @@
                                       body
                                           .empty()
                                           .append( request.resultDOM );
-                                      body.trigger(evLoaded, request);
                                       VBdata.lastRequest = request;
+                                      body.trigger(evLoaded, request);
                                       // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
                                       delete request.resultDOM;
                                       delete request.result;
