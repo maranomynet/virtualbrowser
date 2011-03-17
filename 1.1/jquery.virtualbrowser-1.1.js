@@ -304,15 +304,19 @@
 
 
       fnVB = $.fn[_virtualBrowser] = function (config, args) {
-          var confIsString = typeof config == 'string';
+          var bodies = this,
+              confIsString = typeof config == 'string';
           if (confIsString)
           {
             var method = _methods[config],
                 retValue;
-            method  &&  this.each(function(i){
+            if ( method )
+            {
+              bodies.each(function(i){
                   var methodRet = method.apply( this, [].concat(args) );  // Normalize `args` into an array. ([].concat() does that :-)
                   if (!i) { retValue = methodRet; }
                 });
+            }
             if ( retValue !== undefined )
             {
               return retValue;
@@ -320,37 +324,39 @@
           }
           else
           {
-            config =  $.extend({}, fnVB.defaults, config);
-            args && (config.url = args);
-            var body = this,
-                loadmsgElm = config.loadmsgElm || '<div class="loading" />',
-                // Automatically sniff the document language and choose a loading message accordingly - defaulting on English
-                loadmsg = (fnVB.i18n[body.closest('*[lang]').attr('lang')] || {}).loading || fnVB.i18n.en.loading;
+            bodies
+                .each(function () {
+                    var body = $(this),
+                        cfg = $.extend({}, fnVB.defaults, config);
+                    args && (cfg.url = args);
+                    var loadmsgElm = cfg.loadmsgElm || '<div class="loading" />',
+                        // Automatically sniff the document language and choose a loading message accordingly - defaulting on English
+                        loadmsg = (fnVB.i18n[body.closest('*[lang]').attr('lang')] || {}).loading || fnVB.i18n.en.loading;
 
-            if (loadmsgElm.charAt)
-            {
-              loadmsgElm = loadmsgElm.replace(/%\{msg\}/g, loadmsg);
-            }
-            loadmsgElm = config.loadmsgElm = $(loadmsgElm);
-            if ( !loadmsgElm.text() )
-            {
-              loadmsgElm.append(loadmsg);
-            }
-
-            body
-                .data(_virtualBrowser, { cfg: config })
+                    if (loadmsgElm.charAt)
+                    {
+                      loadmsgElm = loadmsgElm.replace(/%\{msg\}/g, loadmsg);
+                    }
+                    loadmsgElm = cfg.loadmsgElm = $(loadmsgElm);
+                    if ( !loadmsgElm.text() )
+                    {
+                      loadmsgElm.append(loadmsg);
+                    }
+                    body
+                        .data(_virtualBrowser, { cfg: cfg })
+                  })
                 // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
                 // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
                 .bind( 'click submit', _handleHttpRequest);
 
-            config.onLoad  &&  body.bind(_VBload, config.onLoad);
-            config.onLoaded  &&  body.bind(_VBloaded, config.onLoaded);
-            config.onBeforeload  &&  body.bind(_VBbeforeload, config.onBeforeload);
+            config.onLoad        &&  bodies.bind(_VBload, config.onLoad);
+            config.onLoaded      &&  bodies.bind(_VBloaded, config.onLoaded);
+            config.onBeforeload  &&  bodies.bind(_VBbeforeload, config.onBeforeload);
             config.params = typeof config.params == 'string' ?
                                 config.params:
                                 $.param(config.params||{});
 
-            config.url  &&  body[_virtualBrowser]('load', config.url)
+            config.url  &&  bodies[_virtualBrowser]('load', config.url)
           }
           return this;
         };
