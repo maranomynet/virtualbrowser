@@ -167,6 +167,11 @@
                   loadmsgMode = config.loadmsgMode,
                   request = { elm: elm };
 
+              if ( VBdata.$$empty )
+              {
+                request.isFirst = true;
+                delete VBdata.$$empty;
+              }
               if (elm)
               {
                 url = elm.attr('href');
@@ -343,7 +348,7 @@
                       loadmsgElm.append(loadmsg);
                     }
                     body
-                        .data(_virtualBrowser, { cfg: cfg })
+                        .data(_virtualBrowser, { cfg: cfg, $$empty:1 })
                   })
                 // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
                 // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
