@@ -2,7 +2,7 @@
 // ----------------------------------------------------------------------------------
 // jQuery.fn.virtualBrowser v 1.1
 // ----------------------------------------------------------------------------------
-// Copyright 2010
+// Copyright 2011
 //   Hugsmiðjan ehf. (http://www.hugsmidjan.is)  &
 //   Már Örlygsson  (http://mar.anomy.net/)
 //
@@ -33,6 +33,7 @@
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
     * onLoaded:      null,                      // Function: Shorthand for .bind('VBloaded', handler);
+    * onDestroyed:   null,                      // Function: Shorthand for .bind('VBdestroyed', handler);
     * loadmsgElm:    '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
     * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)  // none == no load message; overlay == overlays the old content with the loadmsg; replace == removes the old content before displaying the loadmsg
 
@@ -87,12 +88,20 @@
                               // Uncancellable!
                             });
 
+    * 'VBdestroyed'   // Triggered when the 'destroy' method has finished running (only unbinding VBdestroyed events happens after)
+                      //  .bind('VBloaded', function (e, request) {
+                              this  // the virtualBrowser body element
+                              // NOTE: config and other data has been removed at this point.
+                              // Uncancellable!
+                            });
+
 
   Methods:
     * 'load'    // .virtualBrowser('load', url|linkElm|formElm|collection);  // loads an url (or the 'href' or 'action' attributes of an element) inside the virtualBrwoser 'body' element. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
     * 'data'    // syntactic sugar method that returns .data('virtualBrowser') - an object containing:
                 //    cfg:          // the config object for his virtualBrowser
                 //    lastRequest:  // the request object used in the last 'load' action (updated just *before* 'VBloaded' is triggered)
+    * 'destroy' // .virtualBrowser('destroy');  // Removes all VB* events, removes virtualBrowser data and config, but leaves the DOM otherwise intact.
 
 
   TODO/ideas:
@@ -149,6 +158,7 @@
       _passThrough        = 'passThrough',         // ...to save bandwidth
       _virtualBrowser     = 'virtualBrowser',      // ...to save bandwidth
       _VBbeforeload       = 'VBbeforeload',        // ...to save bandwidth
+      _VBdestroyed        = 'VBdestroyed',         // ...to save bandwidth
       _VBload             = 'VBload',              // ...to save bandwidth
       _VBloaded           = 'VBloaded',            // ...to save bandwidth
       _replace            = 'replace',             // ...to save bandwidth
@@ -157,6 +167,7 @@
 
 
       _methods = {
+
           'load': function (url) {
               var elm = typeof url != 'string' ? $(url) : undefined,
                   body = $(this),
@@ -267,11 +278,24 @@
               return evBeforeload;
             },
 
+
           'data': function () {
               return $(this).data(_virtualBrowser);
+            },
+
+          'destroy': function () {
+              var body = $(this);
+              body
+                  .removeData( _virtualBrowser )
+                  .unbind( 'click submit', _handleHttpRequest)
+                  .unbind( _VBload +' '+ _VBloaded +' '+ _VBbeforeload )
+                  .trigger( _VBdestroyed )
+                  .unbind( _VBdestroyed );
             }
 
         },
+
+
 
 
       _handleHttpRequest = function (e) {
@@ -354,9 +378,10 @@
                 // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
                 .bind( 'click submit', _handleHttpRequest);
 
-            config.onLoad        &&  bodies.bind(_VBload, config.onLoad);
-            config.onLoaded      &&  bodies.bind(_VBloaded, config.onLoaded);
+            config.onLoad        &&  bodies.bind(_VBload,       config.onLoad);
+            config.onLoaded      &&  bodies.bind(_VBloaded,     config.onLoaded);
             config.onBeforeload  &&  bodies.bind(_VBbeforeload, config.onBeforeload);
+            config.onDestroyed   &&  bodies.bind(_VBdestroyed,  config.onDestroyed);
             config.params = typeof config.params == 'string' ?
                                 config.params:
                                 $.param(config.params||{});
@@ -374,6 +399,7 @@
       //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
       //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
       //onLoaded:     null,                     // Function: Shorthand for .bind('VBloaded' handler);
+      //onDestroyed:  null,                     // Function: Shorthand for .bind('VBdestroyed' handler);
       //loadmsgElm:  '<div class="loading" />', // String/Element: Template for a loading message displayed while loading a URL
       loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
     };
