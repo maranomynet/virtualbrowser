@@ -30,6 +30,8 @@
     * url:           null,                      // String|linkElm|formElm|collection: Initial URL for the frame (Uses the 'href' or 'action' attributes in case elements were passed.)
     * params:        null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
     * noCache:       null,                      // Boolean: Controls the $.ajax() cache option
+    * selector:      '>*',                      // String selector to quickly filter the incoming DOM just before injecting it into the virtualBrowser container/body
+                                                // NOTE: the `selector` is not used if a VBload handler has already populated `request.resultDOM`.
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
     * onLoaded:      null,                      // Function: Shorthand for .bind('VBloaded', handler);
@@ -247,6 +249,11 @@
                                     request.result = $.injectBaseHrefToHtml(xhr.responseText, request.url);
                                     request.xhr = xhr;
                                     request.status = status;
+                                    if ( config.selector )
+                                    {
+                                      request.resultDOM = $.getResultBody( request.result ).find( config.selector );
+                                      ;;;alert( request.resultDOM );
+                                    }
                                     evLoad = $.Event(_VBload);
                                     evLoad[_stopPropagation]();
                                     body.trigger(evLoad, request);
@@ -255,7 +262,7 @@
                                       evLoaded = $.Event(_VBloaded);
                                       evLoaded[_stopPropagation]();
                                       config.loadmsgElm.detach();
-                                      request.resultDOM = request.resultDOM || $.getResultBody(request.result).contents();
+                                      request.resultDOM = request.resultDOM  ||  $.getResultBody( request.result ).contents();
                                       body
                                           .empty()
                                           .append( request.resultDOM );
@@ -396,6 +403,7 @@
       //url:          null,                     // String: Initial URL for the frame
       //noCache:      false,                    // Boolean: Controls the $.ajax() cache option
       //params:       null,                     // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
+      //selector:     '>*',                     // String selector to quickly filter the incoming DOM before injecting it into the virtualBrowser container/body  
       //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
       //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
       //onLoaded:     null,                     // Function: Shorthand for .bind('VBloaded' handler);
