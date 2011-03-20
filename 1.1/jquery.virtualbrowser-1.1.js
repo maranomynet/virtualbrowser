@@ -38,6 +38,8 @@
     * onDestroyed:   null,                      // Function: Shorthand for .bind('VBdestroyed', handler);
     * loadmsgElm:    '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
     * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)  // none == no load message; overlay == overlays the old content with the loadmsg; replace == removes the old content before displaying the loadmsg
+    * disengage:     false,                     // Boolean: Sugar method. True triggers the 'destroy' method as soon as the next VBloaded has finished.
+
 
   Localization:
     * jQuery.fn.virtualBrowser.i18n['lang'] = {
@@ -273,6 +275,10 @@
                                       delete request.result;
                                       delete request.xhr;
                                     }
+                                    if ( config.disengage )
+                                    {
+                                      body[_virtualBrowser]('destroy');
+                                    }
                                   }
                       });
                   if (loadmsgMode && loadmsgMode != 'none')
@@ -410,6 +416,7 @@
       //onDestroyed:  null,                     // Function: Shorthand for .bind('VBdestroyed' handler);
       //loadmsgElm:  '<div class="loading" />', // String/Element: Template for a loading message displayed while loading a URL
       loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
+      //disengage:    false,                    // Boolean: Sugar method. True triggers the 'destroy' method as soon as the next VBloaded has finished.
     };
 
   fnVB.i18n = {
