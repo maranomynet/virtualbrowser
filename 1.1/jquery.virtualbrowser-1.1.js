@@ -17,6 +17,9 @@
     and then (manipulate and) insert the response document into the
     virtualBrowser element (which is the semantic equivalient of a real browser's <body>).
 
+  Source & more info: 
+    * http://github.com/maranomynet/virtualbrowser/
+
   Requires:
     * jQuery 1.4.2+
 
