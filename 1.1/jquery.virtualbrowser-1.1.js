@@ -35,10 +35,10 @@
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
     * onLoaded:      null,                      // Function: Shorthand for .bind('VBloaded', handler);
-    * onDestroyed:   null,                      // Function: Shorthand for .bind('VBdestroyed', handler);
+    * onDisengaged:  null,                      // Function: Shorthand for .bind('VBdisengaged', handler);
     * loadmsgElm:    '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
     * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)  // none == no load message; overlay == overlays the old content with the loadmsg; replace == removes the old content before displaying the loadmsg
-    * disengage:     false,                     // Boolean: Sugar method. True triggers the 'destroy' method as soon as the next VBloaded has finished.
+    * disengage:     false,                     // Boolean: Sugar method. True triggers the 'disengage' method as soon as the next VBloaded has finished.
 
 
   Localization:
@@ -92,8 +92,8 @@
                               // Uncancellable!
                             });
 
-    * 'VBdestroyed'   // Triggered when the 'destroy' method has finished running (only unbinding VBdestroyed events happens after)
-                      //  .bind('VBloaded', function (e, request) {
+    * 'VBdisengaged'   // Triggered when the 'disengage' method has finished running (only unbinding VBdisengaged events happens after)
+                      //  .bind('VBdisengaged', function (e) {
                               this  // the virtualBrowser body element
                               // NOTE: config and other data has been removed at this point.
                               // Uncancellable!
@@ -101,11 +101,11 @@
 
 
   Methods:
-    * 'load'    // .virtualBrowser('load', url|linkElm|formElm|collection);  // loads an url (or the 'href' or 'action' attributes of an element) inside the virtualBrwoser 'body' element. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
-    * 'data'    // syntactic sugar method that returns .data('virtualBrowser') - an object containing:
-                //    cfg:          // the config object for his virtualBrowser
-                //    lastRequest:  // the request object used in the last 'load' action (updated just *before* 'VBloaded' is triggered)
-    * 'destroy' // .virtualBrowser('destroy');  // Removes all VB* events, removes virtualBrowser data and config, but leaves the DOM otherwise intact.
+    * 'load'      // .virtualBrowser('load', url|linkElm|formElm|collection);  // loads an url (or the 'href' or 'action' attributes of an element) inside the virtualBrwoser 'body' element. Triggers the normal 'vbrowserpreload' and 'vbrowserload' events
+    * 'data'      // syntactic sugar method that returns .data('virtualBrowser') - an object containing:
+                  //    cfg:          // the config object for his virtualBrowser
+                  //    lastRequest:  // the request object used in the last 'load' action (updated just *before* 'VBloaded' is triggered)
+    * 'disengage' // .virtualBrowser('disengage');  // Removes all VB* events, removes virtualBrowser data and config, but leaves the DOM otherwise intact.
 
 
   TODO/ideas:
@@ -162,7 +162,7 @@
       _passThrough        = 'passThrough',         // ...to save bandwidth
       _virtualBrowser     = 'virtualBrowser',      // ...to save bandwidth
       _VBbeforeload       = 'VBbeforeload',        // ...to save bandwidth
-      _VBdestroyed        = 'VBdestroyed',         // ...to save bandwidth
+      _VBdisengaged       = 'VBdisengaged',        // ...to save bandwidth
       _VBload             = 'VBload',              // ...to save bandwidth
       _VBloaded           = 'VBloaded',            // ...to save bandwidth
       _replace            = 'replace',             // ...to save bandwidth
@@ -277,7 +277,7 @@
                                     }
                                     if ( config.disengage )
                                     {
-                                      body[_virtualBrowser]('destroy');
+                                      body[_virtualBrowser]('disengage');
                                     }
                                   }
                       });
@@ -296,14 +296,14 @@
               return $(this).data(_virtualBrowser);
             },
 
-          'destroy': function () {
+          'disengage': function () {
               var body = $(this);
               body
                   .removeData( _virtualBrowser )
                   .unbind( 'click submit', _handleHttpRequest)
                   .unbind( _VBload +' '+ _VBloaded +' '+ _VBbeforeload )
-                  .trigger( _VBdestroyed )
-                  .unbind( _VBdestroyed );
+                  .trigger( _VBdisengaged )
+                  .unbind( _VBdisengaged );
             }
 
         },
@@ -394,7 +394,7 @@
             config.onLoad        &&  bodies.bind(_VBload,       config.onLoad);
             config.onLoaded      &&  bodies.bind(_VBloaded,     config.onLoaded);
             config.onBeforeload  &&  bodies.bind(_VBbeforeload, config.onBeforeload);
-            config.onDestroyed   &&  bodies.bind(_VBdestroyed,  config.onDestroyed);
+            config.onDisengaged  &&  bodies.bind(_VBdisengaged, config.onDisengaged);
             config.params = typeof config.params == 'string' ?
                                 config.params:
                                 $.param(config.params||{});
@@ -413,10 +413,10 @@
       //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
       //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
       //onLoaded:     null,                     // Function: Shorthand for .bind('VBloaded' handler);
-      //onDestroyed:  null,                     // Function: Shorthand for .bind('VBdestroyed' handler);
+      //onDisengaged:  null,                     // Function: Shorthand for .bind('VBdisengaged' handler);
       //loadmsgElm:  '<div class="loading" />', // String/Element: Template for a loading message displayed while loading a URL
       loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
-      //disengage:    false,                    // Boolean: Sugar method. True triggers the 'destroy' method as soon as the next VBloaded has finished.
+      //disengage:    false,                    // Boolean: Sugar method. True triggers the 'disengage' method as soon as the next VBloaded has finished.
     };
 
   fnVB.i18n = {
