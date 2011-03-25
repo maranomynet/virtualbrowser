@@ -267,7 +267,6 @@
                                     if ( config.selector )
                                     {
                                       request.resultDOM = $.getResultBody( request.result ).find( config.selector );
-                                      ;;;alert( request.resultDOM );
                                     }
                                     evLoad = $.Event(_VBload);
                                     evLoad[_stopPropagation]();
