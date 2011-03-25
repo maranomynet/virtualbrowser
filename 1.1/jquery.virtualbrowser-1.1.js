@@ -235,12 +235,22 @@
                   {
                     method = elm.attr('method') || method;
                     params += '&' + elm.serialize();
-                    var clickedButton = VBdata._clickedBtn;
-                    if ( clickedButton )
+                    var clicked = VBdata._clicked;
+                    if ( clicked )
                     {
-                      params += '&'+ $.param( clickedButton );
-                      delete VBdata._clickedBtn
+                      var clickedElm = clicked.elm;
+                      if ( clickedElm.is(':image') )
+                      {
+                        var name = clickedElm[0].name;
+                        params += '&'+name+'.x='+ Math.round(clicked.X) + '&'+name+'.y='+ Math.round(clicked.Y);
+                      }
+                      else
+                      {
+                        params += '&'+ $.param( clickedElm );
+                      }
+                      delete VBdata._clicked
                     }
+                    params = params.replace(/^&+/,'');
                   }
                   request.params = params;
                   request.method = method;
@@ -317,14 +327,14 @@
       _handleHttpRequest = function (e) {
           var elm = $(e.target).closest(
                           e.type == 'click' ?
-                              '[href], input:submit, button:submit' :
+                              '[href], input:submit, button:submit, input:image' :
                               'form' // e.type == 'submit'
                         );
           if (elm[0])
           {
             if ( !e[_isDefaultPrevented]() )
             {
-              if ( !elm.is(':submit') )
+              if ( !elm.is('input, button') ) // normal link-click or submit event
               {
                 var bfloadEv = _methods['load'].call(this, elm);
                 if ( !bfloadEv[_passThrough] )
@@ -333,14 +343,20 @@
                   bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
                 }
               }
-              else if ( elm.is('[name]') )
+              else if ( !elm[0].disabled )
               {
-                var VBdata = $(this).data(_virtualBrowser);
                 // make note of which submit button was clicked.
-                VBdata._clickedBtn = elm;
+                var VBdata = $(this).data(_virtualBrowser);
+                    _clicked = VBdata._clicked = { elm:elm };
+                if ( elm.is(':image') )
+                {
+                  var offs = elm.offset();
+                  _clicked.X = e.pageX - offs.left;
+                  _clicked.Y = e.pageY - offs.top;
+                }
                 // in case the 'submit' event on the form gets cancelled we need to guarantee that this value gets removed.
                 // A timeout should (theoretically at least) accomplish that.
-                setTimeout(function(){ delete VBdata._clickedBtn; }, 0);
+                setTimeout(function(){ delete VBdata._clicked; }, 0);
               }
             }
           }

@@ -44,7 +44,9 @@
                   request.resultDOM = $( dom.contents() );
                 },
               onLoaded: function (e, request) {
-                  $(this).append('<p><small>(text added on the <code>VBloaded</code> event.)</small></p>');
+                  $(this)
+                      .prepend('<p>'+ request.method +': '+ request.url +' ? '+ request.params +'</p>')
+                      .append('<p><small>(text added on the <code>VBloaded</code> event.)</small></p>');
                   window.console&&console.log( 'The virtualBrowser request:' )
                   window.console&&console.dir&&console.dir( request );
                 }

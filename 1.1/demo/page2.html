@@ -4,11 +4,20 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>Demo Page 2</title>
+  <script src="http://codecentre.eplica.is/jq/jquery-1.4.js"></script>
 </head>
 <body>
 
   <h1>demo/page2.html</h1>
   <p>When forms are submitted the results appear inside the virtualBrowser 'body' element.</p>
+  <form action="page2.html">
+    <p>Testing funky buttons and input:image</p>
+    <input disabled="disabled" type="hidden" name="foo" value="bar" />
+    <input type="submit" name="btn2" value="named" />
+    <input type="submit" name="btn2" />
+    <button type="submit" name="bar">noValue</button>
+    <input type="image" src="image.jpg" name="kitty" value="onlyFirefoxSubmitsThis" />
+  </form>
   <form action="page3.html">
     <p>This form submits to page3.html.</p>
     <input type="hidden" name="foo" value="bar" />
