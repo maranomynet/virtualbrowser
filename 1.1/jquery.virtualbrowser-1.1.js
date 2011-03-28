@@ -321,8 +321,10 @@
                                 fakeXHR:      'iframe',
                                 responseText: '<html>'+iframe.contents().find('html').html()+'</html>'
                               }, status);
-                            iframe.remove();
                             elm.attr('target', oldTarget);
+                            // timeout allows the "loading" thread to finish.
+                            // (Otherwise tab-loading indicator keeps spinning idefinitely (in Firefox at least).)
+                            setTimeout(function(){ iframe.remove(); }, 0);
                           },
                         oldTarget = elm.attr('target');
                     elm.attr('target', iframeName);
