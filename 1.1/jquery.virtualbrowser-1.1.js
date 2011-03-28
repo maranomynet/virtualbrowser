@@ -319,7 +319,7 @@
                             var status = 'success';
                             ajaxOptions.complete({
                                 fakeXHR:      'iframe',
-                                responseText: iframe.contents().find('html').html()
+                                responseText: '<html>'+iframe.contents().find('html').html()+'</html>'
                               }, status);
                             iframe.remove();
                             elm.attr('target', oldTarget);
