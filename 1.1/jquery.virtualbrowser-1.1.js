@@ -34,7 +34,6 @@
     * params:        null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
     * noCache:       null,                      // Boolean: Controls the $.ajax() cache option
     * selector:      '>*',                      // String selector to quickly filter the incoming DOM just before injecting it into the virtualBrowser container/body
-                                                // NOTE: the `selector` is not used if a VBload handler has already populated `request.resultDOM`.
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onError:       null,                      // Function: Shorthand for .bind('VBerror', handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
@@ -87,7 +86,7 @@
                               $(this).data('virtualBrowser').lastRequest // the request object from the last 'load'
                               request  // Object: {
                                        //   result:     // String: The $.ajax()/$.get() callback responseText parameter (Read by handler)
-                                       //   resultDOM:  // Element(s)/Collection to insert into the virtualBrowser body  (Set by handler)
+                                       //   resultDOM:  // Element(s)/Collection to insert into the virtualBrowser body (Set by handler)
                                        //   xhr:        // The XMLHTTPRequest object
                                        //   status:  // The friendly status msg returned by .ajax Complete callback (i.e. "notmodified", "success", "error", "timeout", etc.)
                                        //   url:     // String the URL that was just loaded
@@ -160,8 +159,9 @@
     };
 
 
-  // Turns `$.get`/`$.ajax` responseText HTML document source into a DOM tree, wrapped in a `<div/>` element for easy `.find()`ing
-  // Stripping out all nasty `<script>`s and such things.
+  // Utility method to turn `$.get`/`$.ajax` xhr.responseText HTML document source
+  // into a DOM tree, wrapped in a `<div/>` element for easy `.find()`ing
+  // ...stripping out all nasty `<script>`s and such things.
   $.getResultBody = function (responseText) {
       //return $('<body/>').append( // <-- this seems to cause crashes in IE8. (Note: Crash doesn't seem to happen on first run)
       return $('<div/>').append(
@@ -299,11 +299,12 @@
                                         {
                                           request[_result] = $.injectBaseHrefToHtml(xhr.responseText||'', request.url);
                                         }
-                                        // allow VBerror handlers to set custom .result(DOM) and then process it normally.
+                                        // allow VBerror handlers to set custom .result and then process it normally.
                                         if ( request[_result]  &&  config.selector )
                                         {
                                           request[_resultDOM] = $.getResultBody( request[_result] ).find( config.selector );
                                         }
+                                        // allow VBerror handlers to set custom .resultDOM and then process it normally.
                                         if ( !isError  ||  request[_result]  ||  request[_resultDOM] )
                                         {
                                           evLoad = $.Event(_VBload);
