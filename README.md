@@ -1,9 +1,9 @@
-# jQuery.fn.virtualBrowser();
+# virtualBrowser
 
-Turns any element into a virtual browser window (or iframe), attempting to
+...is a jQuery plugin that turns any element into a virtual browser window (or `iframe`), attempting to
 capture all link-clicks and form submits and convert them into ajax-requests,
 and then (manipulate and) insert the response document into the
-virtualBrowser element (which is the semantic equivalient of a real browser's <body>).
+virtualBrowser element (which is the semantic equivalient of a real browser's `<body>`).
 
 [Version 1.1](1.1/) is the current version, but the 1.0 folder is left in to support older scripts.
 
