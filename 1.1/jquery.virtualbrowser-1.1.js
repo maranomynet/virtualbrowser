@@ -270,7 +270,7 @@
                           data: params,
                           type: method,
                           cache: !noCache,
-                          complete:  function (xhr, status) {
+                          complete: function (xhr, status) {
                                         request.result = $.injectBaseHrefToHtml(xhr.responseText, request.url);
                                         request.xhr = xhr;
                                         request.status = status;
@@ -321,13 +321,24 @@
                                 fakeXHR:      'iframe',
                                 responseText: '<html>'+iframe.contents().find('html').html()+'</html>'
                               }, status);
-                            elm.attr('target', oldTarget);
+                            elm.attr({
+                                target: oldTarget,
+                                action: oldAction
+                              });
+                              
                             // timeout allows the "loading" thread to finish.
                             // (Otherwise tab-loading indicator keeps spinning idefinitely (in Firefox at least).)
                             setTimeout(function(){ iframe.remove(); }, 0);
                           },
-                        oldTarget = elm.attr('target');
+                        oldAction = elm.attr('action') || '',
+                        oldTarget = elm.attr('target') || '';
                     elm.attr('target', iframeName);
+                    if ( config.params )
+                    {
+                      elm.attr('action',
+                          oldAction + (/\?/.test(oldAction)?'&':'?') + config.params
+                        );
+                    }
                     iframe.bind('load', triggerComplete);
                   }
                 }

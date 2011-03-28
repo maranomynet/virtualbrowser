@@ -28,6 +28,7 @@
       $('#VBbody')
           .virtualBrowser({
               url: $('#VBbody a').attr('href'),
+              params: { ajax:1 },
               onLoad: function (e, request) {
                   // $.getResultBody() helps us by stripping out <script>, <meta>, 
                   // <title>, <link> and <style> tags from the ajax request.result ,
