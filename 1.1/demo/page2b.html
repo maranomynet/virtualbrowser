@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- encoding: utf-8 -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="is">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Demo Page 2</title>
+</head>
+<body>
+
+  <h1>demo/page2.html</h1>
+  <p>Forms with file-inputs, and multi-part forms are submitted via a hidden <code>&lt;iframe></code>...</p>
+  <form action="" method="post" enctype="multipart/form-data">
+    <div class="fi_file">
+      <label for="xx_file">Name:</label>
+      <input id="xx_file" type="file" name="name" value="" />
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+  <script>;;;window.console&&console.log( ['Script ran inside iframe! How can we prevent that from happening?'] );</script>
+</body>
+</html>

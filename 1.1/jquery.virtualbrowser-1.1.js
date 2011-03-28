@@ -209,7 +209,8 @@
                         (
                           // if event handler hasn't explicitly set passThrough to false
                           evBeforeload[_passThrough] === undefined  &&
-                          // and elm is defined, and is `target`ted at an external window  // IDEA: allow named virtualBrowsers to target and trigger 'open' actions on eachother
+                          // and elm is defined, and is `target`ted at an external window
+                          // (IDEA: allow named virtualBrowsers to target and trigger 'open' actions on eachother)
                           elm  &&  elm[0].target  &&  elm[0].target != window.name
                         )
                           || // ...or...
@@ -251,52 +252,81 @@
                       delete VBdata._clicked
                     }
                     params = params.replace(/^&+/,'');
+                    // raise a flag if we need to submit via an iframe...
+                    var mp = 'multipart/form-data';
+                    evBeforeload._doIframeSubmit =  !!elm.find('input:file')[0]  ||  elm.attr('enctype') == mp  ||  elm.attr('encoding') == mp;
                   }
                   request.params = params;
                   request.method = method;
 
-                  $.ajax({
-                      url: request.url.split('#')[0],  // just to be safe :)
-                      data: params,
-                      type: method,
-                      cache: !noCache,
-                      complete:  function (xhr, status) {
-                                    request.result = $.injectBaseHrefToHtml(xhr.responseText, request.url);
-                                    request.xhr = xhr;
-                                    request.status = status;
-                                    if ( config.selector )
-                                    {
-                                      request.resultDOM = $.getResultBody( request.result ).find( config.selector );
-                                    }
-                                    evLoad = $.Event(_VBload);
-                                    evLoad[_stopPropagation]();
-                                    body.trigger(evLoad, request);
-                                    if ( !evLoad[_isDefaultPrevented]() )
-                                    {
-                                      evLoaded = $.Event(_VBloaded);
-                                      evLoaded[_stopPropagation]();
-                                      config.loadmsgElm.detach();
-                                      request.resultDOM = request.resultDOM  ||  $.getResultBody( request.result ).contents();
-                                      body
-                                          .empty()
-                                          .append( request.resultDOM );
-                                      VBdata.lastRequest = request;
-                                      body.trigger(evLoaded, request);
-                                      // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
-                                      delete request.resultDOM;
-                                      delete request.result;
-                                      delete request.xhr;
-                                    }
-                                    if ( config.disengage )
-                                    {
-                                      body[_virtualBrowser]('disengage');
-                                    }
-                                  }
-                      });
                   if (loadmsgMode && loadmsgMode != 'none')
                   {
                     config.loadmsgMode == 'replace'  &&  body.empty();
                     body.append(config.loadmsgElm);
+                  }
+
+                  var ajaxOptions = {
+                          url: request.url.split('#')[0],  // just to be safe :)
+                          data: params,
+                          type: method,
+                          cache: !noCache,
+                          complete:  function (xhr, status) {
+                                        request.result = $.injectBaseHrefToHtml(xhr.responseText, request.url);
+                                        request.xhr = xhr;
+                                        request.status = status;
+                                        if ( config.selector )
+                                        {
+                                          request.resultDOM = $.getResultBody( request.result ).find( config.selector );
+                                        }
+                                        evLoad = $.Event(_VBload);
+                                        evLoad[_stopPropagation]();
+                                        body.trigger(evLoad, request);
+                                        if ( !evLoad[_isDefaultPrevented]() )
+                                        {
+                                          evLoaded = $.Event(_VBloaded);
+                                          evLoaded[_stopPropagation]();
+                                          config.loadmsgElm.detach();
+                                          request.resultDOM = request.resultDOM  ||  $.getResultBody( request.result ).contents();
+                                          body
+                                              .empty()
+                                              .append( request.resultDOM );
+                                          VBdata.lastRequest = request;
+                                          body.trigger(evLoaded, request);
+                                          // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
+                                          delete request.resultDOM;
+                                          delete request.result;
+                                          delete request.xhr;
+                                        }
+                                        if ( config.disengage )
+                                        {
+                                          body[_virtualBrowser]('disengage');
+                                        }
+                                      }
+                          };
+
+                  if ( !evBeforeload._doIframeSubmit )
+                  {
+                    $.ajax(ajaxOptions);
+                  }
+                  else
+                  {
+                    // perform a fake XHR request by temporarily injecting an iframe;
+                    ajaxOptions = $.extend({}, ajaxOptions);
+                    var iframeName = 'if'+ (new Date).getTime(),
+                        iframe =  $('<iframe name="'+ iframeName +'" src="about:blank" style="position:absolute;top:-999em;left:-999em;visibility:hidden;" />')
+                                      .appendTo( 'body' ),
+                        triggerComplete = function () {
+                            var status = 'success';
+                            ajaxOptions.complete({
+                                fakeXHR:      'iframe',
+                                responseText: iframe.contents().find('html').html()
+                              }, status);
+                            iframe.remove();
+                            elm.attr('target', oldTarget);
+                          },
+                        oldTarget = elm.attr('target');
+                    elm.attr('target', iframeName);
+                    iframe.bind('load', triggerComplete);
                   }
                 }
               }
@@ -324,10 +354,11 @@
 
 
       _handleHttpRequest = function (e) {
-          var elm = $(e.target).closest(
-                          e.type == 'click' ?
-                              '[href], input:submit, button:submit, input:image' :
-                              'form' // e.type == 'submit'
+          var isSubmit = e.type == 'submit',
+              elm = $(e.target).closest(
+                          isSubmit ?
+                              'form':                                            // e.type == 'submit'
+                              '[href], input:submit, button:submit, input:image' // e.type == 'click'
                         );
           if (elm[0])
           {
@@ -338,7 +369,7 @@
                 var bfloadEv = _methods['load'].call(this, elm);
                 if ( !bfloadEv[_passThrough] )
                 {
-                  e[_preventDefault]();
+                  !bfloadEv._doIframeSubmit  &&  e[_preventDefault]();
                   bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
                 }
               }
