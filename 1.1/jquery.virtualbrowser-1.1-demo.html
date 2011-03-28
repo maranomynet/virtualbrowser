@@ -46,8 +46,10 @@
               onLoaded: function (e, request) {
                   $(this)
                       .prepend(
-                          '<p>'+ request.method +': '+ request.url +' ? '+ request.params +'<br />'+
-                          '<small>(text added by an <code>VBloaded</code> event handler.)</small></p>'
+                          '<p>'+ request.method +': '+ request.url +' ? '+ request.params +
+                          '<br /><small>(text added by an <code>VBloaded</code> event handler.)'+
+                          (request.xhr.fakeXHR ? '<br />(Loaded via a hidden &lt;iframe>.)' : '' )+
+                          '</small></p>'
                         );
                   window.console&&console.log( 'The virtualBrowser request:' );
                   window.console&&console.dir&&console.dir( request );
