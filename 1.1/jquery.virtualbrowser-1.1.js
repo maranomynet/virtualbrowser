@@ -417,6 +417,13 @@
           }
           else
           {
+            config.onLoad        &&  bodies.bind(_VBload,       config.onLoad);
+            config.onLoaded      &&  bodies.bind(_VBloaded,     config.onLoaded);
+            config.onBeforeload  &&  bodies.bind(_VBbeforeload, config.onBeforeload);
+            config.onDisengaged  &&  bodies.bind(_VBdisengaged, config.onDisengaged);
+            config.params = typeof config.params == 'string' ?
+                                config.params:
+                                $.param(config.params||{});
             bodies
                 .each(function () {
                     var body = $(this),
@@ -441,14 +448,6 @@
                 // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
                 // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
                 .bind( 'click submit', _handleHttpRequest);
-
-            config.onLoad        &&  bodies.bind(_VBload,       config.onLoad);
-            config.onLoaded      &&  bodies.bind(_VBloaded,     config.onLoaded);
-            config.onBeforeload  &&  bodies.bind(_VBbeforeload, config.onBeforeload);
-            config.onDisengaged  &&  bodies.bind(_VBdisengaged, config.onDisengaged);
-            config.params = typeof config.params == 'string' ?
-                                config.params:
-                                $.param(config.params||{});
 
             config.url  &&  bodies[_virtualBrowser]('load', config.url)
           }
