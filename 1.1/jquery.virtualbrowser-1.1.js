@@ -130,7 +130,6 @@
     * Consider adding history buffer 'back' (and 'forward'?) methods
         * and an off-by-default 'storeDomWithHistory' option that would store the previous DOM states as-is (with events, data and all) in the history buffer.
         * and 'request' method to retrieve requests from a history buffer.
-    * Make $.injectBaseHrefToHtml use pure DOM methods in modern browsers
     * Consider adding 'reload' sugar method (Already possible via performing 'load' on the VBdata.lastRequest object).
 
 */
@@ -180,9 +179,10 @@
       _passThrough        = 'passThrough',         // ...to save bandwidth
       _virtualBrowser     = 'virtualBrowser',      // ...to save bandwidth
       _VBbeforeload       = 'VBbeforeload',        // ...to save bandwidth
-      _VBdisengaged       = 'VBdisengaged',        // ...to save bandwidth
       _VBload             = 'VBload',              // ...to save bandwidth
+      _VBerror            = 'VBerror',             // ...to save bandwidth
       _VBloaded           = 'VBloaded',            // ...to save bandwidth
+      _VBdisengaged       = 'VBdisengaged',        // ...to save bandwidth
       _replace            = 'replace',             // ...to save bandwidth
       _resultDOM          = 'resultDOM',           // ...to save bandwidth
       _result             = 'result',              // ...to save bandwidth
@@ -293,7 +293,7 @@
                                         var isError = !status || status == 'error';
                                         if ( isError )
                                         {
-                                          body.trigger('VBerror', [request]);
+                                          body.trigger(_VBerror, [request]);
                                         }
                                         else
                                         {
@@ -386,7 +386,7 @@
               body
                   .removeData( _virtualBrowser )
                   .unbind( 'click submit', _handleHttpRequest)
-                  .unbind( _VBload +' '+ _VBloaded +' '+ _VBbeforeload )
+                  .unbind( [_VBbeforeload,_VBerror,_VBload,_VBloaded].join(' ') )
                   .trigger( _VBdisengaged )
                   .unbind( _VBdisengaged );
             }
