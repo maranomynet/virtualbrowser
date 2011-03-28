@@ -65,6 +65,7 @@
                               // cancel caching of the request by explicitly setting `request.noCache = true;`
                               // e.passThrough = true;  // Instructs the virtualBrowser to disable any click events and pass the click through to the web browser
                             });
+
     * 'VBload'        // Triggered after the $.ajax request has completed, *before* any DOM injection has taken place
                       //  .bind('VBload', function (e, request) {
                               this  // the virtualBrowser body element
@@ -95,7 +96,7 @@
                               // Uncancellable!
                             });
 
-    * 'VBdisengaged'   // Triggered when the 'disengage' method has finished running (only unbinding VBdisengaged events happens after)
+    * 'VBdisengaged'  // Triggered when the 'disengage' method has finished running (only unbinding VBdisengaged events happens after)
                       //  .bind('VBdisengaged', function (e) {
                               this  // the virtualBrowser body element
                               // NOTE: config and other data has been removed at this point.
@@ -160,7 +161,7 @@
 
   var _docLoc            = document.location,
       _isDefaultPrevented = 'isDefaultPrevented',  // ...to save bandwidth
-      _preventDefault     = 'preventDefault',     // ...to save bandwidth
+      _preventDefault     = 'preventDefault',      // ...to save bandwidth
       _stopPropagation    = 'stopPropagation',     // ...to save bandwidth
       _passThrough        = 'passThrough',         // ...to save bandwidth
       _virtualBrowser     = 'virtualBrowser',      // ...to save bandwidth
@@ -251,7 +252,7 @@
                       }
                       delete VBdata._clicked
                     }
-                    params = params.replace(/^&+/,'');
+                    params = params.replace(/^&+|&+$/g,'');
                     // raise a flag if we need to submit via an iframe...
                     var mp = 'multipart/form-data';
                     evBeforeload._doIframeSubmit =  !!elm.find('input:file')[0]  ||  elm.attr('enctype') == mp  ||  elm.attr('encoding') == mp;
@@ -377,7 +378,31 @@
           {
             if ( !e[_isDefaultPrevented]() )
             {
-              if ( !elm.is('input, button') ) // normal link-click or submit event
+              if ( elm.is('input, button') )
+              {
+                if ( !elm[0].disabled )
+                {
+                  // make note of which submit button was clicked.
+                  var VBdata = $(this).data(_virtualBrowser);
+                  if ( elm.is(':image') )
+                  {
+                    var offs = elm.offset();
+                    VBdata._clicked = {
+                        elm: elm,
+                        X:   e.pageX - offs.left,
+                        Y:   e.pageY - offs.top
+                      };
+                  }
+                  else if ( elm.is('[name]') )
+                  {
+                    VBdata._clicked = { elm: elm };
+                  }
+                  // in case the 'submit' event on the form gets cancelled we need to guarantee that this value gets removed.
+                  // A timeout should (theoretically at least) accomplish that.
+                  setTimeout(function(){ delete VBdata._clicked; }, 0);
+                }
+              }
+              else // normal link-click or submit event
               {
                 var bfloadEv = _methods['load'].call(this, elm);
                 if ( !bfloadEv[_passThrough] )
@@ -385,21 +410,6 @@
                   !bfloadEv._doIframeSubmit  &&  e[_preventDefault]();
                   bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
                 }
-              }
-              else if ( !elm[0].disabled )
-              {
-                // make note of which submit button was clicked.
-                var VBdata = $(this).data(_virtualBrowser);
-                    _clicked = VBdata._clicked = { elm:elm };
-                if ( elm.is(':image') )
-                {
-                  var offs = elm.offset();
-                  _clicked.X = e.pageX - offs.left;
-                  _clicked.Y = e.pageY - offs.top;
-                }
-                // in case the 'submit' event on the form gets cancelled we need to guarantee that this value gets removed.
-                // A timeout should (theoretically at least) accomplish that.
-                setTimeout(function(){ delete VBdata._clicked; }, 0);
               }
             }
           }
