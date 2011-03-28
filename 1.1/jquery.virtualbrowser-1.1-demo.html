@@ -45,8 +45,10 @@
                 },
               onLoaded: function (e, request) {
                   $(this)
-                      .prepend('<p>'+ request.method +': '+ request.url +' ? '+ request.params +'</p>')
-                      .append('<p><small>(text added on the <code>VBloaded</code> event.)</small></p>');
+                      .prepend(
+                          '<p>'+ request.method +': '+ request.url +' ? '+ request.params +'<br />'+
+                          '<small>(text added by an <code>VBloaded</code> event handler.)</small></p>'
+                        )
                   window.console&&console.log( 'The virtualBrowser request:' )
                   window.console&&console.dir&&console.dir( request );
                 }

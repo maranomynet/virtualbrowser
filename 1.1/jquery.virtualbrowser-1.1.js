@@ -17,7 +17,7 @@
     and then (manipulate and) insert the response document into the
     virtualBrowser element (which is the semantic equivalient of a real browser's <body>).
 
-  Source & more info: 
+  Source & more info:
     * http://github.com/maranomynet/virtualbrowser/
 
   Requires:
@@ -124,7 +124,7 @@
 (function($, undefined){
 
   // make all relative URLs explicitly Absolute - based on a base URL
-  // FIXME: fork the code and use pure DOM methods in modern browsers  
+  // FIXME: fork the code and use pure DOM methods in modern browsers
   $.injectBaseHrefToHtml = function (html, url) {
       // WARNING: horrendous RegExp based HTML parsing follows...
       // Needed for IE6-8 since the HTML to DOM conversion mangles the relative URLs...
@@ -231,7 +231,7 @@
                   var noCache = request.noCache =  request.noCache !== undefined ? request.noCache : config.noCache,
                       params = config.params || '',
                       method = 'GET';
-                  if (elm && elm.is('form'))
+                  if ( elm && elm.is('form') )
                   {
                     method = elm.attr('method') || method;
                     params += '&' + elm.serialize();
@@ -427,7 +427,7 @@
       //url:          null,                     // String: Initial URL for the frame
       //noCache:      false,                    // Boolean: Controls the $.ajax() cache option
       //params:       null,                     // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
-      //selector:     '>*',                     // String selector to quickly filter the incoming DOM before injecting it into the virtualBrowser container/body  
+      //selector:     '>*',                     // String selector to quickly filter the incoming DOM before injecting it into the virtualBrowser container/body
       //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
       //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
       //onLoaded:     null,                     // Function: Shorthand for .bind('VBloaded' handler);
