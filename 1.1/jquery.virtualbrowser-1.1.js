@@ -202,7 +202,7 @@
               if (url)
               {
                 evBeforeload[_stopPropagation]();
-                body.trigger(evBeforeload, request);
+                body.trigger(evBeforeload, [request]);
                 // trap external (non-AJAXable) URLs or links targeted at another window and set .passThrough as true
                 if (  // if passThrough is already set, then there's not need for further checks, and...
                       !evBeforeload[_passThrough] &&
@@ -281,7 +281,7 @@
                                         }
                                         evLoad = $.Event(_VBload);
                                         evLoad[_stopPropagation]();
-                                        body.trigger(evLoad, request);
+                                        body.trigger(evLoad, [request]);
                                         if ( !evLoad[_isDefaultPrevented]() )
                                         {
                                           evLoaded = $.Event(_VBloaded);
@@ -292,7 +292,7 @@
                                               .empty()
                                               .append( request.resultDOM );
                                           VBdata.lastRequest = request;
-                                          body.trigger(evLoaded, request);
+                                          body.trigger(evLoaded, [request]);
                                           // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
                                           delete request.resultDOM;
                                           delete request.result;
