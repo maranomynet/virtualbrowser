@@ -6,7 +6,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>jQuery.virtualBrowser</title>
   <style type="text/css">
-    body       {  font-family: Arial, sans-serif;  }
+    body       {  background-color: #fff;  color: #000;  font-family: Arial, sans-serif;  }
     .wchrome   {  float: left;  margin: 1em 0 2em 2em;  width: 300px;  background-color: #eee;  border: 1px solid #ccc;  padding: 3px 10px 10px 10px;  }
     .ifrchrome {}
     iframe,
@@ -29,6 +29,9 @@
           .virtualBrowser({
               url: $('#VBbody a').attr('href'),
               params: { ajax:1 },
+              onError: function (e, request) {
+                  request.result = '<p>Error just Occurrred!</p>';
+                },
               onLoad: function (e, request) {
                   // $.getResultBody() helps us by stripping out <script>, <meta>, 
                   // <title>, <link> and <style> tags from the ajax request.result ,
@@ -44,7 +47,8 @@
                   // set the dom contents as resultDOM
                   request.resultDOM = $( dom.contents() );
                 },
-              onLoaded: function (e, request) {
+              sonLoaded: function (e, request) {
+                  $('pre').text(request.xhr.responseText).appendTo('body')
                   $(this)
                       .prepend(
                           '<p>'+ request.method +': '+ request.url +' ? '+ request.params +

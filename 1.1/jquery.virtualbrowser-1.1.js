@@ -36,6 +36,7 @@
     * selector:      '>*',                      // String selector to quickly filter the incoming DOM just before injecting it into the virtualBrowser container/body
                                                 // NOTE: the `selector` is not used if a VBload handler has already populated `request.resultDOM`.
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
+    * onError:       null,                      // Function: Shorthand for .bind('VBerror', handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
     * onLoaded:      null,                      // Function: Shorthand for .bind('VBloaded', handler);
     * onDisengaged:  null,                      // Function: Shorthand for .bind('VBdisengaged', handler);
@@ -64,6 +65,19 @@
                               // Cancellable via e.preventDefault()
                               // cancel caching of the request by explicitly setting `request.noCache = true;`
                               // e.passThrough = true;  // Instructs the virtualBrowser to disable any click events and pass the click through to the web browser
+                            });
+
+    * 'VBerror'       // Triggered when the ajax request returns an error.
+                      //  .bind('VBerror', function (e, request) {
+                              this  // the virtualBrowser body element
+                              $(this).data('virtualBrowser').cfg // config object
+                              $(this).data('virtualBrowser').lastRequest // the *current* request object
+                              request  // Object: {
+                                       // ...all the same properties as the 'VBload' event
+                                       // ...except `result` and `resultDOM` are empty
+                                       // }
+                              // Set request.resultDOM, or request.result with custom error DOM to trigger normal processing by VBload and VBloaded...
+                              // ...otherwise nothing will happen...
                             });
 
     * 'VBload'        // Triggered after the $.ajax request has completed, *before* any DOM injection has taken place
@@ -170,6 +184,8 @@
       _VBload             = 'VBload',              // ...to save bandwidth
       _VBloaded           = 'VBloaded',            // ...to save bandwidth
       _replace            = 'replace',             // ...to save bandwidth
+      _resultDOM          = 'resultDOM',           // ...to save bandwidth
+      _result             = 'result',              // ...to save bandwidth
       _protocolSlash      = /^(https?:)?\/\//,
 
 
@@ -272,32 +288,44 @@
                           type: method,
                           cache: !noCache,
                           complete: function (xhr, status) {
-                                        request.result = $.injectBaseHrefToHtml(xhr.responseText, request.url);
                                         request.xhr = xhr;
-                                        request.status = status;
-                                        if ( config.selector )
+                                        request.status = status || 'error';
+                                        var isError = !status || status == 'error';
+                                        if ( isError )
                                         {
-                                          request.resultDOM = $.getResultBody( request.result ).find( config.selector );
+                                          body.trigger('VBerror', [request]);
                                         }
-                                        evLoad = $.Event(_VBload);
-                                        evLoad[_stopPropagation]();
-                                        body.trigger(evLoad, [request]);
-                                        if ( !evLoad[_isDefaultPrevented]() )
+                                        else
                                         {
-                                          evLoaded = $.Event(_VBloaded);
-                                          evLoaded[_stopPropagation]();
-                                          config.loadmsgElm.detach();
-                                          request.resultDOM = request.resultDOM  ||  $.getResultBody( request.result ).contents();
-                                          body
-                                              .empty()
-                                              .append( request.resultDOM );
-                                          VBdata.lastRequest = request;
-                                          body.trigger(evLoaded, [request]);
-                                          // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
-                                          delete request.resultDOM;
-                                          delete request.result;
-                                          delete request.xhr;
+                                          request[_result] = $.injectBaseHrefToHtml(xhr.responseText||'', request.url);
                                         }
+                                        // allow VBerror handlers to set custom .result(DOM) and then process it normally.
+                                        if ( request[_result]  &&  config.selector )
+                                        {
+                                          request[_resultDOM] = $.getResultBody( request[_result] ).find( config.selector );
+                                        }
+                                        if ( !isError  ||  request[_result]  ||  request[_resultDOM] )
+                                        {
+                                          evLoad = $.Event(_VBload);
+                                          evLoad[_stopPropagation]();
+                                          body.trigger(evLoad, [request]);
+                                          if ( !evLoad[_isDefaultPrevented]() )
+                                          {
+                                            evLoaded = $.Event(_VBloaded);
+                                            evLoaded[_stopPropagation]();
+                                            config.loadmsgElm.detach();
+                                            request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result] ).contents();
+                                            body
+                                                .empty()
+                                                .append( request[_resultDOM] );
+                                            VBdata.lastRequest = request;
+                                            body.trigger(evLoaded, [request]);
+                                            // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
+                                            delete request[_resultDOM];
+                                            delete request[_result];
+                                          }
+                                        }
+                                        delete request.xhr;
                                         if ( config.disengage )
                                         {
                                           body[_virtualBrowser]('disengage');
@@ -438,10 +466,11 @@
           }
           else
           {
-            config.onLoad        &&  bodies.bind(_VBload,       config.onLoad);
-            config.onLoaded      &&  bodies.bind(_VBloaded,     config.onLoaded);
-            config.onBeforeload  &&  bodies.bind(_VBbeforeload, config.onBeforeload);
-            config.onDisengaged  &&  bodies.bind(_VBdisengaged, config.onDisengaged);
+            $.each(['Beforeload','Error','Load','Loaded','Disengage'], function (onType, type) {
+                onType = 'on'+type;
+                config[onType]  &&  bodies.bind( 'VB'+type.toLowerCase(), config[onType] );
+                delete config[onType];
+              });
             config.params = typeof config.params == 'string' ?
                                 config.params:
                                 $.param(config.params||{});
