@@ -290,7 +290,7 @@
                           type: method,
                           cache: !noCache,
                           complete: function (xhr, status) {
-                                        body.removeClass(config.loadingClass);
+                                        body.removeClass(config.loadingClass||'');
                                         request.xhr = xhr;
                                         request.status = status || 'error';
                                         var isError = !status || status == 'error';
