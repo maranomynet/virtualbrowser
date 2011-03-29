@@ -39,6 +39,7 @@
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
     * onLoaded:      null,                      // Function: Shorthand for .bind('VBloaded', handler);
     * onDisengaged:  null,                      // Function: Shorthand for .bind('VBdisengaged', handler);
+    * loadingClass:  null,                      // String: className to apply to the virtualBrowser body element during loading
     * loadmsgElm:    '<div class="loading" />'  // String/Element: Template for a loading message displayed while loading a URL
     * loadmsgMode:   'none',                    // String: Options: (none|overlay|replace)  // none == no load message; overlay == overlays the old content with the loadmsg; replace == removes the old content before displaying the loadmsg
     * disengage:     false,                     // Boolean: Sugar method. True triggers the 'disengage' method as soon as the next VBloaded has finished.
@@ -275,6 +276,8 @@
                   request.params = params;
                   request.method = method;
 
+                  body.addClass(config.loadingClass);
+
                   if ( config.loadmsgElm )
                   {
                     config.loadmsgMode == 'replace'  &&  body.empty();
@@ -287,6 +290,7 @@
                           type: method,
                           cache: !noCache,
                           complete: function (xhr, status) {
+                                        body.removeClass(config.loadingClass);
                                         request.xhr = xhr;
                                         request.status = status || 'error';
                                         var isError = !status || status == 'error';
@@ -516,7 +520,8 @@
       //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
       //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
       //onLoaded:     null,                     // Function: Shorthand for .bind('VBloaded' handler);
-      //onDisengaged:  null,                     // Function: Shorthand for .bind('VBdisengaged' handler);
+      //onDisengaged: null,                     // Function: Shorthand for .bind('VBdisengaged' handler);
+      //loadingClass: null,                     // String: className to apply to the virtualBrowser body element during loading
       //loadmsgElm:  '<div class="loading" />', // String/Element: Template for a loading message displayed while loading a URL
       loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
       //disengage:    false,                    // Boolean: Sugar method. True triggers the 'disengage' method as soon as the next VBloaded has finished.
