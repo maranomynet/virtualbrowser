@@ -467,18 +467,18 @@
           }
           else
           {
-            $.each(['Beforeload','Error','Load','Loaded','Disengage'], function (onType, type) {
-                onType = 'on'+type;
-                config[onType]  &&  bodies.bind( 'VB'+type.toLowerCase(), config[onType] );
-                delete config[onType];
-              });
-            config.params = typeof config.params == 'string' ?
-                                config.params:
-                                $.param(config.params||{});
             bodies
                 .each(function () {
                     var body = $(this),
                         cfg = $.extend({}, fnVB.defaults, config);
+                    $.each(['Beforeload','Error','Load','Loaded','Disengage'], function (onType, type) {
+                        onType = 'on'+type;
+                        cfg[onType]  &&  bodies.bind( 'VB'+type.toLowerCase(), cfg[onType] );
+                        delete cfg[onType];
+                      });
+                    cfg.params = typeof cfg.params == 'string' ?
+                                        cfg.params:
+                                        $.param(cfg.params||{});
                     args && (cfg.url = args);
                     var loadmsgElm = cfg.loadmsgElm || '<div class="loading" />',
                         // Automatically sniff the document language and choose a loading message accordingly - defaulting on English
@@ -493,14 +493,13 @@
                     {
                       loadmsgElm.append(loadmsg);
                     }
-                    body
-                        .data(_virtualBrowser, { cfg: cfg, $$empty:1 })
+                    body.data(_virtualBrowser, { cfg: cfg, $$empty:1 });
+                    cfg.url  &&  body[_virtualBrowser]('load', cfg.url);
                   })
                 // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
                 // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
                 .bind( 'click submit', _handleHttpRequest);
 
-            config.url  &&  bodies[_virtualBrowser]('load', config.url)
           }
           return this;
         };
