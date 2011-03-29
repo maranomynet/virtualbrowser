@@ -47,8 +47,8 @@
                   // set the dom contents as resultDOM
                   request.resultDOM = $( dom.contents() );
                 },
-              sonLoaded: function (e, request) {
-                  $('pre').text(request.xhr.responseText).appendTo('body')
+              onLoaded: function (e, request) {
+                  //$('pre').text(request.xhr.responseText).appendTo('body')
                   $(this)
                       .prepend(
                           '<p>'+ request.method +': '+ request.url +' ? '+ request.params +
