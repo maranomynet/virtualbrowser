@@ -199,7 +199,6 @@
                   config = VBdata.cfg,
                   evBeforeload = $.Event(_VBbeforeload),
                   evLoad, evLoaded,
-                  loadmsgMode = config.loadmsgMode,
                   request = { elm: elm };
 
               if ( VBdata.$$empty )
@@ -276,7 +275,7 @@
                   request.params = params;
                   request.method = method;
 
-                  if (loadmsgMode && loadmsgMode != 'none')
+                  if ( config.loadmsgElm )
                   {
                     config.loadmsgMode == 'replace'  &&  body.empty();
                     body.append(config.loadmsgElm);
@@ -314,7 +313,7 @@
                                           {
                                             evLoaded = $.Event(_VBloaded);
                                             evLoaded[_stopPropagation]();
-                                            config.loadmsgElm.detach();
+                                            config.loadmsgElm  &&  config.loadmsgElm.detach();
                                             request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result] ).contents();
                                             body
                                                 .empty()
@@ -480,18 +479,22 @@
                                         cfg.params:
                                         $.param(cfg.params||{});
                     args && (cfg.url = args);
-                    var loadmsgElm = cfg.loadmsgElm || '<div class="loading" />',
-                        // Automatically sniff the document language and choose a loading message accordingly - defaulting on English
-                        loadmsg = (fnVB.i18n[body.closest('*[lang]').attr('lang')] || {}).loading || fnVB.i18n.en.loading;
 
-                    if (loadmsgElm.charAt)
+                    if ( cfg.loadmsgMode != 'none' )
                     {
-                      loadmsgElm = loadmsgElm.replace(/%\{msg\}/g, loadmsg);
-                    }
-                    loadmsgElm = cfg.loadmsgElm = $(loadmsgElm);
-                    if ( !loadmsgElm.text() )
-                    {
-                      loadmsgElm.append(loadmsg);
+                      var loadmsgElm = cfg.loadmsgElm || '<div class="loading" />',
+                          // Automatically sniff the document language and choose a loading message accordingly - defaulting on English
+                          loadmsg = (fnVB.i18n[body.closest('*[lang]').attr('lang')] || {}).loading || fnVB.i18n.en.loading;
+
+                      if (loadmsgElm.charAt)
+                      {
+                        loadmsgElm = loadmsgElm.replace(/%\{msg\}/g, loadmsg);
+                      }
+                      loadmsgElm = cfg.loadmsgElm = $(loadmsgElm);
+                      if ( !loadmsgElm.text() )
+                      {
+                        loadmsgElm.append(loadmsg);
+                      }
                     }
                     body.data(_virtualBrowser, { cfg: cfg, $$empty:1 });
                     cfg.url  &&  body[_virtualBrowser]('load', cfg.url);
