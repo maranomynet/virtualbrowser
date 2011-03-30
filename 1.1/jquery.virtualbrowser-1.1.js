@@ -271,7 +271,7 @@
                     params = params.replace(/^&+|&+$/g,'');
                     // raise a flag if we need to submit via an iframe...
                     var mp = 'multipart/form-data';
-                    evBeforeload._doIframeSubmit =  !!elm.find('input:file')[0]  ||  elm.attr('enctype') == mp  ||  elm.attr('encoding') == mp;
+                    evBeforeload._doIframeSubmit =  elm.attr('enctype') == mp  ||  elm.attr('encoding') == mp  ||  !!elm.find('input:file')[0];
                   }
                   request.params = params;
                   request.method = method;
