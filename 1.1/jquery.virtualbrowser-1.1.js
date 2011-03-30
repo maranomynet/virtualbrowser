@@ -346,7 +346,9 @@
                     // perform a fake XHR request by temporarily injecting an iframe;
                     ajaxOptions = $.extend({}, ajaxOptions);
                     var iframeName = 'if'+ (new Date).getTime(),
-                        iframe =  $('<iframe name="'+ iframeName +'" src="about:blank" style="position:absolute;top:-999em;left:-999em;visibility:hidden;" />')
+                        // javascript:""; seems to be the safest bet for HTTP and HTTPS pages.
+                        // See here: http://www.zachleat.com/web/adventures-in-i-frame-shims-or-how-i-learned-to-love-the-bomb/
+                        iframe =  $('<iframe name="'+ iframeName +'" src=\'javascript:"";\' style="position:absolute;top:-999em;left:-999em;visibility:hidden;" />')
                                       .appendTo( 'body' ),
                         triggerComplete = function () {
                             var status = 'success';
