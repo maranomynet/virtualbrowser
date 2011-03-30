@@ -500,6 +500,10 @@
                         loadmsgElm.append(loadmsg);
                       }
                     }
+                    else
+                    {
+                      delete cfg.loadmsgElm;
+                    }
                     body.data(_virtualBrowser, { cfg: cfg, $$empty:1 });
                     cfg.url  &&  body[_virtualBrowser]('load', cfg.url);
                   })
