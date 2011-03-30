@@ -474,7 +474,7 @@
                 .each(function () {
                     var body = $(this),
                         cfg = $.extend({}, fnVB.defaults, config);
-                    $.each(['Beforeload','Error','Load','Loaded','Disengage'], function (onType, type) {
+                    $.each(['Beforeload','Error','Load','Loaded','Disengaged'], function (onType, type) {
                         onType = 'on'+type;
                         cfg[onType]  &&  bodies.bind( 'VB'+type.toLowerCase(), cfg[onType] );
                         delete cfg[onType];
