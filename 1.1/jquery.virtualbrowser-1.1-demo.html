@@ -27,6 +27,7 @@
 
       $('#VBbody')
           .virtualBrowser({
+              loadmsgMode: 'replace',
               url: $('#VBbody a').attr('href'),
               params: { ajax:1 },
               onError: function (e, request) {

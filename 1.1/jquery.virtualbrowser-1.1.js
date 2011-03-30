@@ -280,8 +280,12 @@
 
                   if ( config.loadmsgElm )
                   {
-                    config.loadmsgMode == 'replace'  &&  body.empty();
-                    body.append(config.loadmsgElm);
+                    // timeout is required because on `evBeforeload._doIframeSubmit` we pass the submit event through
+                    // ...and in those cases, instantly `.empty()`ing the body is a bad idea. :-)
+                    setTimeout(function(){
+                        config.loadmsgMode == 'replace'  &&  body.empty();
+                        body.append(config.loadmsgElm);
+                      }, 0);
                   }
 
                   var ajaxOptions = {
