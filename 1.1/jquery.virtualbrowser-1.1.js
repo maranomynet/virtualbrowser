@@ -76,7 +76,7 @@
                                        // ...all the same properties as the 'VBload' event
                                        // ...except `result` and `resultDOM` are empty
                                        // }
-                              // Set request.resultDOM, or request.result with custom error DOM to trigger normal processing by VBload and VBloaded...
+                              // Assign custom error DOM into `request.resultDOM`, or `request.result` to trigger normal processing by VBload and VBloaded...
                               // ...otherwise nothing will happen...
                             });
 
@@ -86,8 +86,10 @@
                               $(this).data('virtualBrowser').cfg  // config object
                               $(this).data('virtualBrowser').lastRequest // the request object from the last 'load'
                               request  // Object: {
-                                       //   result:     // String: The $.ajax()/$.get() callback responseText parameter (Read by handler)
-                                       //   resultDOM:  // Element(s)/Collection to insert into the virtualBrowser body (Set by handler)
+                                       //   result:     // String: The $.ajax()/$.get() callback responseText parameter
+                                       //   resultDOM:  // Element(s)/Collection that will get inserted into the virtualBrowser body.
+                                                        // ...will be `undefined` unless `cfg.selector` is non-empty, or an `VBerror` handler has injected a custom resultDOM.
+                                                        // set/modify this property to your heart's desire.
                                        //   xhr:        // The XMLHTTPRequest object
                                        //   status:  // The friendly status msg returned by .ajax Complete callback (i.e. "notmodified", "success", "error", "timeout", etc.)
                                        //   url:     // String the URL that was just loaded
@@ -306,7 +308,7 @@
                                         {
                                           request[_result] = $.injectBaseHrefToHtml(xhr.responseText||'', request.url);
                                         }
-                                        // allow VBerror handlers to set custom .result and then process it normally.
+                                        // We intentionally allow VBerror handlers to set custom .result string and then process it normally.
                                         if ( request[_result]  &&  config.selector )
                                         {
                                           request[_resultDOM] = $.getResultBody( request[_result] ).find( config.selector );
@@ -322,6 +324,7 @@
                                             evLoaded = $.Event(_VBloaded);
                                             evLoaded[_stopPropagation]();
                                             config.loadmsgElm  &&  config.loadmsgElm.detach();
+                                            // default to just dumping resultBody's `.contents()` into the DOM.
                                             request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result] ).contents();
                                             body
                                                 .empty()
