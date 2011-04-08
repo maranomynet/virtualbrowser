@@ -296,6 +296,7 @@
                           type: method,
                           cache: !noCache,
                           complete: function (xhr, status) {
+                              if (!xhr) { return } // on error with jQuery 1.4, IE<=8 will sometimes run the complete callback twice - with xhr undefined the second time.
                               clearTimeout(applyLoadMsg); // prevent race-conditions between loadMsgElm injection thread, and the ajax loader.
                               body.removeClass(config.loadingClass||'');
                               request.xhr = xhr; 
