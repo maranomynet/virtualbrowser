@@ -202,7 +202,8 @@
                   config = VBdata.cfg,
                   evBeforeload = $.Event(_VBbeforeload),
                   evLoad, evLoaded,
-                  request = { elm: elm };
+                  request = { elm: elm },
+                  applyLoadMsg;
 
               if ( VBdata.$$empty )
               {
@@ -279,12 +280,11 @@
                   request.method = method;
 
                   body.addClass(config.loadingClass);
-
                   if ( config.loadmsgElm )
                   {
                     // timeout is required because on `evBeforeload._doIframeSubmit` we pass the submit event through
                     // ...and in those cases, instantly `.empty()`ing the body is a bad idea. :-)
-                    setTimeout(function(){
+                    applyLoadMsg = setTimeout(function(){
                         config.loadmsgMode == 'replace'  &&  body.empty();
                         body.append(config.loadmsgElm);
                       }, 0);
@@ -296,52 +296,53 @@
                           type: method,
                           cache: !noCache,
                           complete: function (xhr, status) {
-                                        body.removeClass(config.loadingClass||'');
-                                        request.xhr = xhr;
-                                        request.status = status || 'error';
-                                        var isError = !status || status == 'error';
-                                        if ( isError )
-                                        {
-                                          body.trigger(_VBerror, [request]);
-                                        }
-                                        else
-                                        {
-                                          request[_result] = $.injectBaseHrefToHtml(xhr.responseText||'', request.url);
-                                        }
-                                        // We intentionally allow VBerror handlers to set custom .result string and then process it normally.
-                                        if ( request[_result]  &&  config.selector )
-                                        {
-                                          request[_resultDOM] = $.getResultBody( request[_result] ).find( config.selector );
-                                        }
-                                        // allow VBerror handlers to set custom .resultDOM and then process it normally.
-                                        if ( !isError  ||  request[_result]  ||  request[_resultDOM] )
-                                        {
-                                          evLoad = $.Event(_VBload);
-                                          evLoad[_stopPropagation]();
-                                          body.trigger(evLoad, [request]);
-                                          if ( !evLoad[_isDefaultPrevented]() )
-                                          {
-                                            evLoaded = $.Event(_VBloaded);
-                                            evLoaded[_stopPropagation]();
-                                            config.loadmsgElm  &&  config.loadmsgElm.detach();
-                                            // default to just dumping resultBody's `.contents()` into the DOM.
-                                            request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result] ).contents();
-                                            body
-                                                .empty()
-                                                .append( request[_resultDOM] );
-                                            VBdata.lastRequest = request;
-                                            body.trigger(evLoaded, [request]);
-                                            // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
-                                            delete request[_resultDOM];
-                                            delete request[_result];
-                                          }
-                                        }
-                                        delete request.xhr;
-                                        if ( config.disengage )
-                                        {
-                                          body[_virtualBrowser]('disengage');
-                                        }
-                                      }
+                              clearTimeout(applyLoadMsg); // prevent race-conditions between loadMsgElm injection thread, and the ajax loader.
+                              body.removeClass(config.loadingClass||'');
+                              request.xhr = xhr; 
+                              request.status = status || 'error';
+                              var isError = !status || status == 'error';
+                              if ( isError )
+                              {
+                                body.trigger(_VBerror, [request]);
+                              }
+                              else
+                              {
+                                request[_result] = $.injectBaseHrefToHtml(xhr.responseText||'', request.url);
+                              }
+                              // We intentionally allow VBerror handlers to set custom .result string and then process it normally.
+                              if ( request[_result]  &&  config.selector )
+                              {
+                                request[_resultDOM] = $.getResultBody( request[_result] ).find( config.selector );
+                              }
+                              // allow VBerror handlers to set custom .resultDOM and then process it normally.
+                              if ( !isError  ||  request[_result]  ||  request[_resultDOM] )
+                              {
+                                evLoad = $.Event(_VBload);
+                                evLoad[_stopPropagation]();
+                                body.trigger(evLoad, [request]);
+                                if ( !evLoad[_isDefaultPrevented]() )
+                                {
+                                  evLoaded = $.Event(_VBloaded);
+                                  evLoaded[_stopPropagation]();
+                                  config.loadmsgElm  &&  config.loadmsgElm.detach();
+                                  // default to just dumping resultBody's `.contents()` into the DOM.
+                                  request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result] ).contents();
+                                  body
+                                      .empty()
+                                      .append( request[_resultDOM] );
+                                  VBdata.lastRequest = request;
+                                  body.trigger(evLoaded, [request]);
+                                  // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
+                                  delete request[_resultDOM];
+                                  delete request[_result];
+                                }
+                              }
+                              delete request.xhr;
+                              if ( config.disengage )
+                              {
+                                body[_virtualBrowser]('disengage');
+                              }
+                            }
                           };
 
                   if ( !evBeforeload._doIframeSubmit )
@@ -357,21 +358,6 @@
                         // See here: http://www.zachleat.com/web/adventures-in-i-frame-shims-or-how-i-learned-to-love-the-bomb/
                         iframe =  $('<iframe name="'+ iframeName +'" src=\'javascript:"";\' style="position:absolute;top:-999em;left:-999em;visibility:hidden;" />')
                                       .appendTo( 'body' ),
-                        triggerComplete = function () {
-                            var status = 'success';
-                            ajaxOptions.complete({
-                                fakeXHR:      'iframe',
-                                responseText: '<html>'+iframe.contents().find('html').html()+'</html>'
-                              }, status);
-                            elm.attr({
-                                target: oldTarget,
-                                action: oldAction
-                              });
-                              
-                            // timeout allows the "loading" thread to finish.
-                            // (Otherwise tab-loading indicator keeps spinning idefinitely (in Firefox at least).)
-                            setTimeout(function(){ iframe.remove(); }, 0);
-                          },
                         oldAction = elm.attr('action') || '',
                         oldTarget = elm.attr('target') || '';
                     elm.attr('target', iframeName);
@@ -381,7 +367,21 @@
                           oldAction + (/\?/.test(oldAction)?'&':'?') + config.params
                         );
                     }
-                    iframe.bind('load', triggerComplete);
+                    iframe.bind('load', function () {
+                        var status = 'success'; // this is kind of meaningless... the iframe might very well contain a 404 or whatever...
+                        ajaxOptions.complete({
+                            fakeXHR:      'iframe',
+                            responseText: '<html>'+iframe.contents().find('html').html()+'</html>'
+                          }, status);
+                        elm.attr({
+                            target: oldTarget,
+                            action: oldAction
+                          });
+                          
+                        // timeout allows the "loading" thread to finish.
+                        // (Otherwise tab-loading indicator keeps spinning idefinitely (in Firefox at least).)
+                        setTimeout(function(){ iframe.remove(); }, 0);
+                      });
                   }
                 }
               }
