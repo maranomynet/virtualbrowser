@@ -410,9 +410,9 @@
 
 
       _handleHttpRequest = function (e) {
-          var isSubmit = e.type == 'submit',
+          var vbElm = this,
               elm = $(e.target).closest(
-                          isSubmit ?
+                          (e.type == 'submit') ?
                               'form':                                            // e.type == 'submit'
                               '[href], input:submit, button:submit, input:image' // e.type == 'click'
                         );
@@ -425,7 +425,7 @@
                 if ( !elm[0].disabled )
                 {
                   // make note of which submit button was clicked.
-                  var VBdata = $(this).data(_virtualBrowser);
+                  var VBdata = $(vbElm).data(_virtualBrowser);
                   if ( elm.is(':image') )
                   {
                     var offs = elm.offset();
@@ -446,7 +446,7 @@
               }
               else // normal link-click or submit event
               {
-                var bfloadEv = _methods['load'].call(this, elm);
+                var bfloadEv = _methods['load'].call(vbElm, elm);
                 if ( !bfloadEv[_passThrough] )
                 {
                   !bfloadEv._doIframeSubmit  &&  e[_preventDefault]();
