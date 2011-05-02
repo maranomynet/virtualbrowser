@@ -21,7 +21,7 @@
     * http://github.com/maranomynet/virtualbrowser/
 
   Requires:
-    * jQuery 1.4.2+
+    * jQuery 1.5.2+
 
 
   Usage/Init:
@@ -332,7 +332,15 @@
                                       .empty()
                                       .append( request[_resultDOM] );
                                   VBdata.lastRequest = request;
-                                  body.trigger(evLoaded, [request]);
+                                  body
+                                      .trigger(evLoaded, [request])
+                                      // NOTE: We can't rely on bubbling in IE8- because bubbling happens first on the container elements,
+                                      // and last on the form itself. (at least in jQuery 1.4 and 1.5)
+                                      // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
+                                      // submit events on contained forms directly.
+                                      .find('form')
+                                          .data(_virtualBrowser, body)
+                                          .bind('submit', _handleHttpRequest);
                                   // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
                                   delete request[_resultDOM];
                                   delete request[_result];
@@ -400,6 +408,7 @@
                   .removeData( _virtualBrowser )
                   .unbind( 'click', _handleHttpRequest)
                   .find('form')
+                      .removeData(_virtualBrowser)
                       .unbind( 'click', _handleHttpRequest)
                   .end()
                   .unbind( [_VBbeforeload,_VBerror,_VBload,_VBloaded].join(' ') )
@@ -413,12 +422,13 @@
 
 
       _handleHttpRequest = function (e) {
-          var vbElm = this,
-              elm = $(e.target).closest(
-                          (e.type == 'submit') ?
-                              'form':                                            // e.type == 'submit'
-                              '[href], input:submit, button:submit, input:image' // e.type == 'click'
-                        );
+          var isSubmit = (e.type == 'submit'),
+              elm = isSubmit ?
+                        $(this):
+                        $(e.target).closest('[href], input:submit, button:submit, input:image'),
+              vbElm = isSubmit ?
+                        elm.data(_virtualBrowser):
+                        this;
           if (elm[0])
           {
             if ( !e[_isDefaultPrevented]() )
@@ -522,13 +532,7 @@
                   })
                 // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
                 // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
-                .bind( 'click', _handleHttpRequest)
-                // NOTE: We can't rely on bubbling in IE8- because bubbling happens first on the container elements,
-                // and last on the form itself. (at least in jQuery 1.4 and 1.5)
-                // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
-                // submit events on contained forms directly.
-                .find('form')
-                    .bind('submit', _handleHttpRequest);
+                .bind( 'click', _handleHttpRequest);
 
           }
           return this;
