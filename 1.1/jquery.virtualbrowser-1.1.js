@@ -528,11 +528,26 @@
                       delete cfg.loadmsgElm;
                     }
                     body.data(_virtualBrowser, { cfg: cfg, $$empty:1 });
-                    cfg.url  &&  body[_virtualBrowser]('load', cfg.url);
+                    body
+                        // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
+                        // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
+                        .bind( 'click', _handleHttpRequest);
+
+                    if ( cfg.url )
+                    {
+                      body[_virtualBrowser]('load', cfg.url);
+                    }
+                    else
+                    {
+                      // NOTE: We can't rely on bubbling in IE8- because bubbling happens first on the container elements,
+                      // and last on the form itself. (at least in jQuery 1.4 and 1.5)
+                      // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
+                      // submit events on contained forms directly.
+                      body.find( 'form' )
+                          .data(_virtualBrowser, body)
+                          .bind( 'submit', _handleHttpRequest);
+                    }
                   })
-                // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
-                // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
-                .bind( 'click', _handleHttpRequest);
 
           }
           return this;
