@@ -20,8 +20,8 @@
     form p     {  margin-bottom: .25em;  }
   </style>
 
-  <script src="http://codecentre.eplica.is/jq/jquery-1.5-source.js"></script>
-  <script src="jquery.virtualbrowser-1.1.js"></script>
+  <script src="../../jquery/1.5/jquery-1.5.js"></script>
+  <script src="jquery.virtualbrowser-1.1-min.js"></script>
   <script>
     jQuery(function($){
 
@@ -62,6 +62,16 @@
                 }
             });
 
+      $('a.loadtest')
+          .bind('click', function (e) {
+              $('#VBbody').virtualBrowser('load', {
+                  url:'demo/page1.html',
+                  params:'testing=yeah',
+                  method:'POST'
+                });
+              return false;
+            });
+
     });
   </script>
 </head>
@@ -77,6 +87,7 @@
         <div class="fi_btn"><button type="submit">Send</button></div>
       </form>
     </div>
+    <a class="loadtest" href="#">loadtest</a>
   </div>
 
   <div class="wchrome ifrchrome">

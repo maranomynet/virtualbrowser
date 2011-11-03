@@ -195,28 +195,42 @@
 
       _methods = {
 
-          'load': function (url) {
-              var elm = typeof url != 'string' ? $(url) : undefined,
+          'load': function (arg) {
+              var request = {},
+                  elm,
+                  url,
                   body = $(this),
                   VBdata = body.data(_virtualBrowser),
                   config = VBdata.cfg,
                   evBeforeload = $.Event(_VBbeforeload),
                   evLoad, evLoaded,
-                  request = { elm: elm },
                   applyLoadMsg;
+
+              if ( $.isPlainObject(arg) )
+              {
+                $.extend( request, arg );
+                url = request.url;
+                delete request.elm; // incoming request objects don't get to have a URL - it only confuses things.
+              }
+              else if ( typeof arg == 'string' )
+              {
+                url = arg;
+              }
+              else
+              {
+                elm = $(arg);
+                request.elm = elm;
+                url = elm.attr('href');
+                url = url === undefined ? elm.attr('action') : url;
+              }
+              // Correctly resolve relative empty-string URLs (like <form action="">)
+              url = request.url = (url === '') ? _docLoc.href : url;
 
               if ( VBdata.$$empty )
               {
                 request.isFirst = true;
                 delete VBdata.$$empty;
               }
-              if (elm)
-              {
-                url = elm.attr('href');
-                url = url === undefined ? elm.attr('action') : url;
-              }
-              // Correctly resolve relative empty-string URLs (like <form action="">)
-              url = request.url = url === '' ? _docLoc.href : url;
 
               if (url)
               {
@@ -250,12 +264,13 @@
                 if ( !evBeforeload[_isDefaultPrevented]() )
                 {
                   var noCache = request.noCache =  request.noCache !== undefined ? request.noCache : config.noCache,
-                      params = config.params || '',
-                      method = 'GET';
+                      params = config.params ? [config.params] : [],
+                      method;
+                  
                   if ( elm && elm.is('form') )
                   {
-                    method = elm.attr('method') || method;
-                    params += '&' + elm.serialize();
+                    method = elm.attr('method');
+                    params.push( elm.serialize() );
                     var clicked = VBdata._clicked;
                     if ( clicked )
                     {
@@ -263,21 +278,29 @@
                       if ( clickedElm.is(':image') )
                       {
                         var name = clickedElm[0].name;
-                        params += '&'+name+'.x='+ Math.round(clicked.X) + '&'+name+'.y='+ Math.round(clicked.Y);
+                        params.push( name+'.x='+ Math.round(clicked.X) );
+                        params.push( name+'.y='+ Math.round(clicked.Y) );
                       }
                       else
                       {
-                        params += '&'+ $.param( clickedElm );
+                        params.push( $.param( clickedElm ) );
                       }
                       delete VBdata._clicked
                     }
-                    params = params.replace(/^&+|&+$/g,'');
                     // raise a flag if we need to submit via an iframe...
                     var mp = 'multipart/form-data';
                     evBeforeload._doIframeSubmit =  elm.attr('enctype') == mp  ||  elm.attr('encoding') == mp  ||  !!elm.find('input:file')[0];
                   }
-                  request.params = params;
-                  request.method = method;
+                  if ( request.params )
+                  {
+                    params.push(
+                        (typeof request.params == 'string') ?
+                            request.params:
+                            $.param(request.params||{})
+                      );
+                  }
+                  params = request.params =  params.join('&');
+                  method = request.method =  request.method || method || 'GET';
 
                   body.addClass(config.loadingClass);
                   if ( config.loadmsgElm )
@@ -354,11 +377,7 @@
                             }
                           };
 
-                  if ( !evBeforeload._doIframeSubmit )
-                  {
-                    $.ajax(ajaxOptions);
-                  }
-                  else
+                  if ( evBeforeload._doIframeSubmit )
                   {
                     // perform a fake XHR request by temporarily injecting an iframe;
                     ajaxOptions = $.extend({}, ajaxOptions);
@@ -391,6 +410,10 @@
                         // (Otherwise tab-loading indicator keeps spinning idefinitely (in Firefox at least).)
                         setTimeout(function(){ iframe.remove(); }, 0);
                       });
+                  }
+                  else
+                  {
+                    $.ajax(ajaxOptions);
                   }
                 }
               }
@@ -502,7 +525,7 @@
                         cfg[onType]  &&  bodies.bind( 'VB'+type.toLowerCase(), cfg[onType] );
                         delete cfg[onType];
                       });
-                    cfg.params = typeof cfg.params == 'string' ?
+                    cfg.params = (typeof cfg.params == 'string') ?
                                         cfg.params:
                                         $.param(cfg.params||{});
                     args && (cfg.url = args);
