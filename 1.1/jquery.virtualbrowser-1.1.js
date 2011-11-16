@@ -34,6 +34,7 @@
     * params:        null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
     * noCache:       null,                      // Boolean: Controls the $.ajax() cache option
     * selector:      '>*',                      // String selector to quickly filter the incoming DOM just before injecting it into the virtualBrowser container/body
+    * stripCfg:      null,                      // Object: config for the $.getResultsBody() method
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onError:       null,                      // Function: Shorthand for .bind('VBerror', handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
@@ -164,12 +165,14 @@
   // Utility method to turn `$.get`/`$.ajax` xhr.responseText HTML document source
   // into a DOM tree, wrapped in a `<div/>` element for easy `.find()`ing
   // ...stripping out all nasty `<script>`s and such things.
-  $.getResultBody = function (responseText) {
+  $.getResultBody = function (responseText, cfg) {
+      var me = $.getResultBody;
+      cfg = cfg || {};
       //return $('<body/>').append( // <-- this seems to cause crashes in IE8. (Note: Crash doesn't seem to happen on first run)
       return $('<div/>').append(
                   $(responseText||[])
-                      .not('script,title,meta,link,style')
-                          .find('script,style')
+                      .not( cfg.stripFlat || me.stripFlat || 'script,title,meta,link,style' )
+                          .find( cfg.stripDeep || me.stripDeep || 'script,style' )
                               .remove()
                           .end()
                 );
@@ -336,7 +339,7 @@
                               // We intentionally allow VBerror handlers to set custom .result string and then process it normally.
                               if ( request[_result]  &&  config.selector )
                               {
-                                request[_resultDOM] = $.getResultBody( request[_result] ).find( config.selector );
+                                request[_resultDOM] = $.getResultBody( request[_result], config.stripCfg ).find( config.selector );
                               }
                               // allow VBerror handlers to set custom .resultDOM and then process it normally.
                               if ( !isError  ||  request[_result]  ||  request[_resultDOM] )
@@ -350,7 +353,7 @@
                                   evLoaded[_stopPropagation]();
                                   config.loadmsgElm  &&  config.loadmsgElm.detach();
                                   // default to just dumping resultBody's `.contents()` into the DOM.
-                                  request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result] ).contents();
+                                  request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result], config.stripCfg ).contents();
                                   body
                                       .empty()
                                       .append( request[_resultDOM] );
@@ -581,6 +584,7 @@
       //url:          null,                     // String: Initial URL for the frame
       //noCache:      false,                    // Boolean: Controls the $.ajax() cache option
       //params:       null,                     // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
+      //stripCfg:     null,                     // Object: config for the $.getResultsBody() method
       //selector:     '>*',                     // String selector to quickly filter the incoming DOM before injecting it into the virtualBrowser container/body
       //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
       //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
