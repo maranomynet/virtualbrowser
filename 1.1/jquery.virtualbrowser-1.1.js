@@ -165,7 +165,7 @@
   // Utility method to turn `$.get`/`$.ajax` xhr.responseText HTML document source
   // into a DOM tree, wrapped in a `<div/>` element for easy `.find()`ing
   // ...stripping out all nasty `<script>`s and such things.
-  $.getResultBody = function (responseText, cfg) {
+  $.getResultBody = $.getResultBody || function (responseText, cfg) {
       var me = $.getResultBody;
       cfg = cfg || {};
       //return $('<body/>').append( // <-- this seems to cause crashes in IE8. (Note: Crash doesn't seem to happen on first run)
