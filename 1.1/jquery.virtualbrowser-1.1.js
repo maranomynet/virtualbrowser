@@ -383,7 +383,6 @@
                   if ( evBeforeload._doIframeSubmit )
                   {
                     // perform a fake XHR request by temporarily injecting an iframe;
-                    ajaxOptions = $.extend({}, ajaxOptions);
                     var iframeName = 'if'+ (new Date).getTime(),
                         // javascript:""; seems to be the safest bet for HTTP and HTTPS pages.
                         // See here: http://www.zachleat.com/web/adventures-in-i-frame-shims-or-how-i-learned-to-love-the-bomb/
