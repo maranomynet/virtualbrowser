@@ -61,7 +61,9 @@
                               $(this).data('virtualBrowser').lastRequest // the request object from the last 'load'
                               request  // Object: {
                                        //   url:  // String the URL that was just loaded (Modifiable by handler)
-                                       //   elm:  // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
+                                       //   elm:  // undefined or jQuery collection containing the link (or form element) that was clicked/submitted
+                                       //   btn:  // undefined or Object whose presense indicates that form-submit was triggered by a named button or input[type=image]
+                                                  // Contains an `elm` property (jQuery collection with the button element), and also `X` & `Y` (int) click coordinates for image buttons.
                                        // }
                               // Cancellable via e.preventDefault()
                               // cancel caching of the request by explicitly setting `request.noCache = true;`
@@ -97,7 +99,8 @@
                                        //   params:  // String the contents of the $.ajax data property
                                        //   method:  // String the method that was used (either "GET" or "POST")
                                        //   noCache: // boolean (defaults to false)
-                                       //   elm:     // jQuery collection containing (when applicable) the link (or form element) that was clicked/submitted
+                                       //   elm:     // (See above documentation for 'VBbeforeload'.)
+                                       //   btn:     // (See above documentation for 'VBbeforeload'.)
                                        // }
                               // Cancellable via e.preventDefault()
                             });
@@ -238,6 +241,9 @@
               if (url)
               {
                 evBeforeload[_stopPropagation]();
+                if ( VBdata._clicked ) {
+                  request.btn = VBdata._clicked; // store reference to the clicked button - to allow access/evaulation by event handlers.
+                }
                 body.trigger(evBeforeload, [request]);
                 // trap external (non-AJAXable) URLs or links targeted at another window and set .passThrough as true
                 if (  // if passThrough is already set, then there's not need for further checks, and...
@@ -462,7 +468,7 @@
           {
             if ( !e[_isDefaultPrevented]() )
             {
-              if ( elm.is('input, button') )
+              if ( elm.is('input, button') ) // click on a submit button - 
               {
                 if ( !elm[0].disabled )
                 {
@@ -483,7 +489,7 @@
                   }
                   // in case the 'submit' event on the form gets cancelled we need to guarantee that this value gets removed.
                   // A timeout should (theoretically at least) accomplish that.
-                  setTimeout(function(){ delete VBdata._clicked; }, 0);
+                  VBdata._clicked  &&  setTimeout(function(){ delete VBdata._clicked; }, 0);
                 }
               }
               else // normal link-click or submit event
