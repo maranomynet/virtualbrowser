@@ -579,8 +579,9 @@
                       // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
                       // submit events on contained forms directly.
                       body.find( 'form' )
-                          .data(_virtualBrowser, body)
-                          .bind( 'submit', _handleHttpRequest);
+                          .add( body.filter('form') ) // allow body itself to be a <form>
+                              .data(_virtualBrowser, body)
+                              .bind( 'submit', _handleHttpRequest);
                     }
                   })
 
