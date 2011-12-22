@@ -187,6 +187,7 @@
       _stopPropagation    = 'stopPropagation',     // ...to save bandwidth
       _passThrough        = 'passThrough',         // ...to save bandwidth
       _virtualBrowser     = 'virtualBrowser',      // ...to save bandwidth
+      _virtualBrowserBdy  = _virtualBrowser+'Bdy', // ...to save bandwidth
       _VBbeforeload       = 'VBbeforeload',        // ...to save bandwidth
       _VBload             = 'VBload',              // ...to save bandwidth
       _VBerror            = 'VBerror',             // ...to save bandwidth
@@ -371,7 +372,7 @@
                                       // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
                                       // submit events on contained forms directly.
                                       .find('form')
-                                          .data(_virtualBrowser, body)
+                                          .data(_virtualBrowserBdy, body)
                                           .bind('submit', _handleHttpRequest);
                                   // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
                                   delete request[_resultDOM];
@@ -443,7 +444,7 @@
                   .removeData( _virtualBrowser )
                   .unbind( 'click', _handleHttpRequest)
                   .find('form')
-                      .removeData(_virtualBrowser)
+                      .removeData( _virtualBrowserBdy )
                       .unbind( 'click', _handleHttpRequest)
                   .end()
                   .unbind( [_VBbeforeload,_VBerror,_VBload,_VBloaded].join(' ') )
@@ -462,7 +463,7 @@
                         $(this):
                         $(e.target).closest('[href], input:submit, button:submit, input:image'),
               vbElm = isSubmit ?
-                        elm.data(_virtualBrowser):
+                        elm.data(_virtualBrowserBdy):
                         this;
           if (elm[0])
           {
@@ -580,7 +581,7 @@
                       // submit events on contained forms directly.
                       body.find( 'form' )
                           .add( body.filter('form') ) // allow body itself to be a <form>
-                              .data(_virtualBrowser, body)
+                              .data(_virtualBrowserBdy, body)
                               .bind( 'submit', _handleHttpRequest);
                     }
                   })
