@@ -535,7 +535,7 @@
                         cfg = $.extend({}, fnVB.defaults, config);
                     $.each(['Beforeload','Error','Load','Loaded','Disengaged'], function (onType, type) {
                         onType = 'on'+type;
-                        cfg[onType]  &&  bodies.bind( 'VB'+type.toLowerCase(), cfg[onType] );
+                        cfg[onType]  &&  body.bind( 'VB'+type.toLowerCase(), cfg[onType] );
                         delete cfg[onType];
                       });
                     cfg.params = (typeof cfg.params == 'string') ?
