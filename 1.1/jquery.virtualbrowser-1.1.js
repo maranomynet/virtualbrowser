@@ -442,10 +442,11 @@
               var body = $(this);
               body
                   .removeData( _virtualBrowser )
-                  .unbind( 'click', _handleHttpRequest)
+                  .removeData( _virtualBrowserBdy )
+                  .unbind( 'click submit', _handleHttpRequest)
                   .find('form')
                       .removeData( _virtualBrowserBdy )
-                      .unbind( 'click', _handleHttpRequest)
+                      .unbind( 'submit', _handleHttpRequest)
                   .end()
                   .unbind( [_VBbeforeload,_VBerror,_VBload,_VBloaded].join(' ') )
                   .trigger( _VBdisengaged )
@@ -535,7 +536,7 @@
                         cfg = $.extend({}, fnVB.defaults, config);
                     $.each(['Beforeload','Error','Load','Loaded','Disengaged'], function (onType, type) {
                         onType = 'on'+type;
-                        cfg[onType]  &&  body.bind( 'VB'+type.toLowerCase(), cfg[onType] );
+                        cfg[onType]  &&  bodies.bind( 'VB'+type.toLowerCase(), cfg[onType] );
                         delete cfg[onType];
                       });
                     cfg.params = (typeof cfg.params == 'string') ?
