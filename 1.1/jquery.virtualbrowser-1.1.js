@@ -55,64 +55,72 @@
 
   Events:
     * 'VBbeforeload'  // Triggered before the $.ajax call.
-                      //  .bind('VBbeforeload', function (e, request) {
+                      //  .bind('VBbeforeload', function (e, request, vbdata) {
                               this  // the virtualBrowser body element
-                              $(this).data('virtualBrowser').cfg  // config object
-                              $(this).data('virtualBrowser').lastRequest // the request object from the last 'load'
-                              request  // Object: {
-                                       //   url:  // String the URL that was just loaded (Modifiable by handler)
-                                       //   elm:  // undefined or jQuery collection containing the link (or form element) that was clicked/submitted
-                                       //   btn:  // undefined or Object whose presense indicates that form-submit was triggered by a named button or input[type=image]
-                                                  // Contains an `elm` property (jQuery collection with the button element), and also `X` & `Y` (int) click coordinates for image buttons.
-                                       // }
+                              vbdata  // Object: {
+                                      //   cfg:          // config object
+                                      //   lastRequest:  // the *current* request object
+                                      // }
+                              request // Object: {
+                                      //   url:  // String the URL that was just loaded (Modifiable by handler)
+                                      //   elm:  // undefined or jQuery collection containing the link (or form element) that was clicked/submitted
+                                      //   btn:  // undefined or Object whose presense indicates that form-submit was triggered by a named button or input[type=image]
+                                                 // Contains an `elm` property (jQuery collection with the button element), and also `X` & `Y` (int) click coordinates for image buttons.
+                                      // }
                               // Cancellable via e.preventDefault()
                               // cancel caching of the request by explicitly setting `request.noCache = true;`
                               // e.passThrough = true;  // Instructs the virtualBrowser to disable any click events and pass the click through to the web browser
                             });
 
     * 'VBerror'       // Triggered when the ajax request returns an error.
-                      //  .bind('VBerror', function (e, request) {
+                      //  .bind('VBerror', function (e, request vbdata) {
                               this  // the virtualBrowser body element
-                              $(this).data('virtualBrowser').cfg // config object
-                              $(this).data('virtualBrowser').lastRequest // the *current* request object
-                              request  // Object: {
-                                       // ...all the same properties as the 'VBload' event
-                                       // ...except `result` and `resultDOM` are empty
-                                       // }
+                              vbdata  // Object: {
+                                      // cfg:          // config object
+                                      // lastRequest:  // the *current* request object
+                                      // }
+                              request // Object: {
+                                      // ...all the same properties as the 'VBload' event
+                                      // ...except `result` and `resultDOM` are empty
+                                      // }
                               // Assign custom error DOM into `request.resultDOM`, or `request.result` to trigger normal processing by VBload and VBloaded...
                               // ...otherwise nothing will happen...
                             });
 
     * 'VBload'        // Triggered after the $.ajax request has completed, *before* any DOM injection has taken place
-                      //  .bind('VBload', function (e, request) {
+                      //  .bind('VBload', function (e, request, vbdata) {
                               this  // the virtualBrowser body element
-                              $(this).data('virtualBrowser').cfg  // config object
-                              $(this).data('virtualBrowser').lastRequest // the request object from the last 'load'
+                              vbdata  // Object: {
+                                      // cfg:          // config object
+                                      // lastRequest:  // the *current* request object
+                                      // }
                               request  // Object: {
-                                       //   result:     // String: The $.ajax()/$.get() callback responseText parameter
-                                       //   resultDOM:  // Element(s)/Collection that will get inserted into the virtualBrowser body.
-                                                        // ...will be `undefined` unless `cfg.selector` is non-empty, or an `VBerror` handler has injected a custom resultDOM.
-                                                        // set/modify this property to your heart's desire.
-                                       //   xhr:        // The XMLHTTPRequest object
-                                       //   status:  // The friendly status msg returned by .ajax Complete callback (i.e. "notmodified", "success", "error", "timeout", etc.)
-                                       //   url:     // String the URL that was just loaded
-                                       //   params:  // String the contents of the $.ajax data property
-                                       //   method:  // String the method that was used (either "GET" or "POST")
-                                       //   noCache: // boolean (defaults to false)
-                                       //   elm:     // (See above documentation for 'VBbeforeload'.)
-                                       //   btn:     // (See above documentation for 'VBbeforeload'.)
-                                       // }
+                                      //   result:  // String: The $.ajax()/$.get() callback responseText parameter
+                                      //   resultDOM:  // Element(s)/Collection that will get inserted into the virtualBrowser body.
+                                                       // ...will be `undefined` unless `cfg.selector` is non-empty, or an `VBerror` handler has injected a custom resultDOM.
+                                                       // set/modify this property to your heart's desire.
+                                      //   xhr:        // The XMLHTTPRequest object
+                                      //   status:  // The friendly status msg returned by .ajax Complete callback (i.e. "notmodified", "success", "error", "timeout", etc.)
+                                      //   url:     // String the URL that was just loaded
+                                      //   params:  // String the contents of the $.ajax data property
+                                      //   method:  // String the method that was used (either "GET" or "POST")
+                                      //   noCache: // boolean (defaults to false)
+                                      //   elm:     // (See above documentation for 'VBbeforeload'.)
+                                      //   btn:     // (See above documentation for 'VBbeforeload'.)
+                                      // }
                               // Cancellable via e.preventDefault()
                             });
 
     * 'VBloaded'      // Triggered *after* the resultDOM has been injected into the virtualBrowser body. Think of it as `window.onload` of sorts.
-                      //  .bind('VBloaded', function (e, request) {
+                      //  .bind('VBloaded', function (e, request, vbdata) {
                               this  // the virtualBrowser body element
-                              $(this).data('virtualBrowser').cfg // config object
-                              $(this).data('virtualBrowser').lastRequest // the *current* request object
-                              request  // Object: {
-                                       // ...all the same properties as the 'VBload' event...
-                                       // }
+                              vbdata  // Object: {
+                                      // cfg:          // config object
+                                      // lastRequest:  // the *current* request object
+                                      // }
+                              request // Object: {
+                                      // ...all the same properties as the 'VBload' event...
+                                      // }
                               // Uncancellable!
                             });
 
@@ -244,7 +252,7 @@
                 if ( VBdata._clicked ) {
                   request.btn = VBdata._clicked; // store reference to the clicked button - to allow access/evaulation by event handlers.
                 }
-                body.trigger(evBeforeload, [request]);
+                body.trigger(evBeforeload, [request, VBdata]);
                 // trap external (non-AJAXable) URLs or links targeted at another window and set .passThrough as true
                 if (  // if passThrough is already set, then there's not need for further checks, and...
                       !evBeforeload[_passThrough] &&
@@ -336,7 +344,7 @@
                               var isError = !status || status == 'error';
                               if ( isError )
                               {
-                                body.trigger(_VBerror, [request]);
+                                body.trigger(_VBerror, [request, VBdata]);
                               }
                               else
                               {
@@ -352,7 +360,7 @@
                               {
                                 evLoad = $.Event(_VBload);
                                 evLoad[_stopPropagation]();
-                                body.trigger(evLoad, [request]);
+                                body.trigger(evLoad, [request, VBdata]);
                                 if ( !evLoad[_isDefaultPrevented]() )
                                 {
                                   evLoaded = $.Event(_VBloaded);
@@ -365,7 +373,7 @@
                                       .append( request[_resultDOM] );
                                   VBdata.lastRequest = request;
                                   body
-                                      .trigger(evLoaded, [request])
+                                      .trigger(evLoaded, [request, VBdata])
                                       // NOTE: We can't rely on bubbling in IE8- because bubbling happens first on the container elements,
                                       // and last on the form itself. (at least in jQuery 1.4 and 1.5)
                                       // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
