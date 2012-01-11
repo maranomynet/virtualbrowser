@@ -63,10 +63,11 @@
                                       //   lastRequest:  // the *current* request object
                                       // }
                               request // Object: {
-                                      //   url:  // String the URL that was just loaded (Modifiable by handler)
-                                      //   elm:  // undefined or jQuery collection containing the link (or form element) that was clicked/submitted
-                                      //   btn:  // undefined or Object whose presense indicates that form-submit was triggered by a named button or input[type=image]
-                                                 // Contains an `elm` property (jQuery collection with the button element), and also `X` & `Y` (int) click coordinates for image buttons.
+                                      //   isFirst: // Boolean sugar flag indicating if there is such a thing as vbdata.lastRequest
+                                      //   url:     // String the URL that was just loaded (Modifiable by handler)
+                                      //   elm:     // undefined or jQuery collection containing the link (or form element) that was clicked/submitted
+                                      //   btn:     // undefined or Object whose presense indicates that form-submit was triggered by a named button or input[type=image]
+                                                    // Contains an `elm` property (jQuery collection with the button element), and also `X` & `Y` (int) click coordinates for image buttons.
                                       // }
                               // Cancellable via e.preventDefault()
                               // cancel caching of the request by explicitly setting `request.noCache = true;`
@@ -96,6 +97,7 @@
                                       // lastRequest:  // the *current* request object
                                       // }
                               request  // Object: {
+                                      //   isFirst: // Boolean sugar flag indicating if there is such a thing as vbdata.lastRequest
                                       //   result:  // String: The $.ajax()/$.get() callback responseText parameter
                                       //   resultDOM:  // Element(s)/Collection that will get inserted into the virtualBrowser body.
                                                        // ...will be `undefined` unless `cfg.selector` is non-empty, or an `VBerror` handler has injected a custom resultDOM.
