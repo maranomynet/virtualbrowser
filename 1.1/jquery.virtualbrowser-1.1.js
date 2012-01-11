@@ -33,7 +33,7 @@
     * url:           null,                      // String|linkElm|formElm|collection: Initial URL for the frame (Uses the 'href' or 'action' attributes in case elements were passed.)
     * params:        null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
     * noCache:       null,                      // Boolean: Controls the $.ajax() cache option
-    * selector:      '>*',                      // String selector to quickly filter the incoming DOM just before injecting it into the virtualBrowser container/body
+    * selector:      null,                      // String selector to quickly filter the incoming DOM just before injecting it into the virtualBrowser container/body. Defaults to just dumping the whole request body
     * stripCfg:      null,                      // Object: config for the $.getResultsBody() method
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onError:       null,                      // Function: Shorthand for .bind('VBerror', handler);
@@ -593,19 +593,19 @@
 
 
   fnVB.defaults = {
-      //url:          null,                     // String: Initial URL for the frame
-      //noCache:      false,                    // Boolean: Controls the $.ajax() cache option
-      //params:       null,                     // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
-      //stripCfg:     null,                     // Object: config for the $.getResultsBody() method
-      //selector:     '>*',                     // String selector to quickly filter the incoming DOM before injecting it into the virtualBrowser container/body
-      //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
-      //onLoad:       null,                     // Function: Shorthand for .bind('VBload' handler);
-      //onLoaded:     null,                     // Function: Shorthand for .bind('VBloaded' handler);
-      //onDisengaged: null,                     // Function: Shorthand for .bind('VBdisengaged' handler);
-      //loadingClass: null,                     // String: className to apply to the virtualBrowser body element during loading
-      //loadmsgElm:  '<div class="loading" />', // String/Element: Template for a loading message displayed while loading a URL
-      loadmsgMode:    'none'                    // String: available: "none", "overlay" & "replace"
-      //disengage:    false,                    // Boolean: Sugar method. True triggers the 'disengage' method as soon as the next VBloaded has finished.
+      //url:          null,                      // String: Initial URL for the frame
+      //noCache:      false,                     // Boolean: Controls the $.ajax() cache option
+      //params:       null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
+      //stripCfg:     null,                      // Object: config for the $.getResultsBody() method
+      //selector:     null,                      // String selector to quickly filter the incoming DOM before injecting it into the virtualBrowser container/body. Defaults to just dumping the whole result body
+      //onBeforeload: null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
+      //onLoad:       null,                      // Function: Shorthand for .bind('VBload' handler);
+      //onLoaded:     null,                      // Function: Shorthand for .bind('VBloaded' handler);
+      //onDisengaged: null,                      // Function: Shorthand for .bind('VBdisengaged' handler);
+      //loadingClass: null,                      // String: className to apply to the virtualBrowser body element during loading
+      //loadmsgElm:   '<div class="loading" />', // String/Element: Template for a loading message displayed while loading a URL
+      loadmsgMode:    'none'                   // String: available: "none", "overlay" & "replace"
+      //disengage:    false,                     // Boolean: Sugar method. True triggers the 'disengage' method as soon as the next VBloaded has finished.
     };
 
   fnVB.i18n = {
