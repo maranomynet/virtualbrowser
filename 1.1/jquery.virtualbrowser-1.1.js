@@ -233,10 +233,9 @@
               // Correctly resolve relative empty-string URLs (like <form action="">)
               url = request.url = (url === '') ? _docLoc.href : url;
 
-              if ( VBdata.$$empty )
+              if ( !VBdata.lastRequest )
               {
                 request.isFirst = true;
-                delete VBdata.$$empty;
               }
 
               if (url)
@@ -564,7 +563,7 @@
                     {
                       delete cfg.loadmsgElm;
                     }
-                    body.data(_virtualBrowser, { cfg: cfg, $$empty:1 });
+                    body.data(_virtualBrowser, { cfg: cfg });
                     body
                         // Depend on 'click' events bubbling up to the virtualBrowser element to allow event-delegation
                         // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
