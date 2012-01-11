@@ -30,15 +30,17 @@
               loadmsgMode: 'replace',
               url: $('#VBbody a').attr('href'),
               params: { ajax:1 },
-              onError: function (e, request) {
+              imgSuppress: true,
+              onError: function (e, request, vbdata) {
                   request.result = '<p>Error just Occurrred!</p>';
                 },
-              onLoad: function (e, request) {
+              onLoad: function (e, request, vbdata) {
                   // $.getResultBody() helps us by stripping out <script>, <meta>, 
                   // <title>, <link> and <style> tags from the ajax request.result ,
                   // and wraps the remains in a <div> for easier .find()ing.
                   var dom = $.getResultBody( request.result );
                   // change the incoming <h1>s to <h3>
+                  dom.find('img.unwanted').remove();
                   dom.find('h1').each(function () {
                       var h1Elm = $(this);
                       h1Elm
@@ -48,7 +50,7 @@
                   // set the dom contents as resultDOM
                   request.resultDOM = $( dom.contents() );
                 },
-              onLoaded: function (e, request) {
+              onLoaded: function (e, request, vbdata) {
                   //$('pre').text(request.xhr.responseText).appendTo('body')
                   $(this)
                       .prepend(
@@ -92,9 +94,9 @@
 
   <div class="wchrome ifrchrome">
     <h2>Browsing in an <code>&lt;frame></code>:</h2>
-    <iframe src="demo/page1.html" height="300" scrolling="auto">
+    <uiframe src="demo/page1.html" height="300" scrolling="auto">
       Alernate content. <a href="demo/page1.html">Go to page1.html</a></p>
-    </iframe>
+    </uiframe>
   </div>
 
   <pre id="log"></pre>
