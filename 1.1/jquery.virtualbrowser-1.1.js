@@ -472,8 +472,8 @@
                       .removeData( _virtualBrowserBdy )
                       .unbind( 'submit', _handleHttpRequest)
                   .end()
-                  .unbind( [_VBbeforeload,_VBerror,_VBload,_VBloaded].join(' ') )
-              _triggerCustomEv( body, _VBdisengaged );
+                  .unbind( [_VBbeforeload,_VBerror,_VBload,_VBloaded].join(' ') );
+              _triggerCustomEv( _VBdisengaged, body );
               body
                   .unbind( _VBdisengaged );
             }
