@@ -198,7 +198,6 @@
       _stopPropagation    = 'stopPropagation',     // ...to save bandwidth
       _passThrough        = 'passThrough',         // ...to save bandwidth
       _virtualBrowser     = 'virtualBrowser',      // ...to save bandwidth
-      _virtualBrowserBdy  = _virtualBrowser+'Bdy', // ...to save bandwidth
       _VBbeforeload       = 'VBbeforeload',        // ...to save bandwidth
       _VBload             = 'VBload',              // ...to save bandwidth
       _VBerror            = 'VBerror',             // ...to save bandwidth
@@ -396,8 +395,7 @@
                                       // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
                                       // submit events on contained forms directly.
                                       .find('form')
-                                          .data(_virtualBrowserBdy, body)
-                                          .bind('submit', _handleHttpRequest);
+                                          .bind('submit.vb'+body.data('VBid'), $.proxy(_handleHttpRequest, body[0]) );
                                   // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
                                   delete request[_resultDOM];
                                   delete request[_result];
@@ -466,11 +464,9 @@
               var body = $(this);
               body
                   .removeData( _virtualBrowser )
-                  .removeData( _virtualBrowserBdy )
                   .unbind( 'click submit', _handleHttpRequest)
                   .find('form')
-                      .removeData( _virtualBrowserBdy )
-                      .unbind( 'submit', _handleHttpRequest)
+                      .unbind( 'submit.vb'+body.data('VBid'), _handleHttpRequest)
                   .end()
                   .unbind( [_VBbeforeload,_VBerror,_VBload,_VBloaded].join(' ') );
               _triggerCustomEv( _VBdisengaged, body );
@@ -484,52 +480,49 @@
 
 
       _handleHttpRequest = function (e) {
-          if ( !e[_virtualBrowser+'Handled'] ) // leave the event alone, if it's already handled by a inner virtualBrowser
+          if ( !e[_isDefaultPrevented]()  &&  !e[_virtualBrowser+'Handled'] ) // leave the event alone, if it's already handled by a inner virtualBrowser
           {
-            var isSubmit = (e.type == 'submit'),
-                elm = isSubmit ?
-                          $(this):
-                          $(e.target).closest('[href], input:submit, button:submit, input:image'),
-                vbElm = isSubmit ?
-                          elm.data(_virtualBrowserBdy):
-                          this;
+            var elm = $(e.target).closest(
+                          (e.type == 'submit') ?
+                              '[action]':
+                              'input:submit, button:submit, input:image, [href]',
+                          this
+                        );
             if (elm[0])
             {
-              if ( !e[_isDefaultPrevented]() )
+              var vbElm = $(this);
+              if ( elm.is('input, button') ) // click on a submit button - 
               {
-                if ( elm.is('input, button') ) // click on a submit button - 
+                if ( !elm[0].disabled )
                 {
-                  if ( !elm[0].disabled )
+                  // make note of which submit button was clicked.
+                  var VBdata = vbElm.data(_virtualBrowser);
+                  if ( elm.is(':image') )
                   {
-                    // make note of which submit button was clicked.
-                    var VBdata = $(vbElm).data(_virtualBrowser);
-                    if ( elm.is(':image') )
-                    {
-                      var offs = elm.offset();
-                      VBdata._clicked = {
-                          elm: elm,
-                          X:   e.pageX - offs.left,
-                          Y:   e.pageY - offs.top
-                        };
-                    }
-                    else if ( elm.is('[name]') )
-                    {
-                      VBdata._clicked = { elm: elm };
-                    }
-                    // in case the 'submit' event on the form gets cancelled we need to guarantee that this value gets removed.
-                    // A timeout should (theoretically at least) accomplish that.
-                    VBdata._clicked  &&  setTimeout(function(){ delete VBdata._clicked; }, 0);
+                    var offs = elm.offset();
+                    VBdata._clicked = {
+                        elm: elm,
+                        X:   e.pageX - offs.left,
+                        Y:   e.pageY - offs.top
+                      };
                   }
+                  else if ( elm.is('[name]') )
+                  {
+                    VBdata._clicked = { elm: elm };
+                  }
+                  // in case the 'submit' event on the form gets cancelled we need to guarantee that this value gets removed.
+                  // A timeout should (theoretically at least) accomplish that.
+                  VBdata._clicked  &&  setTimeout(function(){ delete VBdata._clicked; }, 0);
                 }
-                else // normal link-click or submit event
+              }
+              else // normal link-click or submit event
+              {
+                var bfloadEv = _methods['load'].call(vbElm[0], elm, {_nativeEvent:true});
+                if ( !bfloadEv[_passThrough] )
                 {
-                  var bfloadEv = _methods['load'].call(vbElm, elm, {_nativeEvent:true});
-                  if ( !bfloadEv[_passThrough] )
-                  {
-                    !bfloadEv._doIframeSubmit  &&  e[_preventDefault]();
-                    bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
-                    e[_virtualBrowser+'Handled'] = true; // flag that this event has been captured and handled by virtualBrowser plugin. Means that outer virtualBrowsers should leave it alone
-                  }
+                  !bfloadEv._doIframeSubmit  &&  e[_preventDefault]();
+                  bfloadEv.isPropagationStopped()  &&  e[_stopPropagation]();
+                  e[_virtualBrowser+'Handled'] = true; // flag that this event has been captured and handled by virtualBrowser plugin. Means that outer virtualBrowsers should leave it alone
                 }
               }
             }
@@ -599,6 +592,8 @@
                         // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by virtualBrowser.
                         .bind( 'click', _handleHttpRequest);
 
+                    body.data('VBid', (new Date()).getTime() );
+
                     if ( cfg.url )
                     {
                       body[_virtualBrowser]('load', cfg.url);
@@ -609,10 +604,9 @@
                       // and last on the form itself. (at least in jQuery 1.4 and 1.5)
                       // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
                       // submit events on contained forms directly.
-                      body.find( 'form' )
+                      body.find('form')
                           .add( body.filter('form') ) // allow body itself to be a <form>
-                              .data(_virtualBrowserBdy, body)
-                              .bind( 'submit', _handleHttpRequest);
+                              .bind( 'submit.vb'+body.data('VBid'), $.proxy(_handleHttpRequest, body[0]) );
                     }
                   })
 
