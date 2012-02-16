@@ -154,8 +154,9 @@
 
               if (url)
               {
-                evBeforeload[_stopPropagation]();
-                body.trigger(evBeforeload, request);
+                body
+                    .one(_VBbeforeload, function(e){ e[_stopPropagation]() }) // needed because of http://bugs.jquery.com/ticket/10699
+                    .trigger(evBeforeload, request);
                 // trap external (non-AJAXable) URLs or links targeted at another window and set .passThrough as true
                 if (  // if passThrough is already set, then there's not need for further checks, and...
                       !evBeforeload[_passThrough] &&
@@ -200,16 +201,17 @@
                                     request.xhr = xhr;
                                     request.status = status;
                                     evLoad = $.Event(_VBload);
-                                    evLoad[_stopPropagation]();
-                                    body.trigger(evLoad, request);
+                                    body
+                                        .one(_VBload, function(e){ e[_stopPropagation]() })
+                                        .trigger(evLoad, request);
                                     if ( !evLoad[_isDefaultPrevented]() )
                                     {
                                       evLoaded = $.Event(_VBloaded);
-                                      evLoaded[_stopPropagation]();
                                       config.loadmsgElm.detach();
                                       body
                                           .empty()
                                           .append( request.resultDOM || $.getResultBody(request.result)[0].childNodes )
+                                          .one(_VBloaded, function(e){ e[_stopPropagation]() })
                                           .trigger(evLoaded, { url: request.url, elm: request.elm })
                                           // Depend on 'click' events bubbling up to the virtualBrowser `body` to allow event-delegation and click-bubbling within the `body`
                                           // Thus, we assume that any clicks who's bubbling were cancelled should not be handled by VB.

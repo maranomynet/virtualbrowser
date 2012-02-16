@@ -210,8 +210,9 @@
       _protocolSlash      = /^(https?:)?\/\//,
       _triggerCustomEv    = function ( evtype, body, req, vbdata ) {
           var ev = $.Event(evtype);
-          ev.stopPropagation();
-          body.trigger(ev, [req, vbdata]);
+          body
+              .one(evtype, function(e){ e[_stopPropagation]() }) // needed because of http://bugs.jquery.com/ticket/10699
+              .trigger(ev, [req, vbdata]);
           return ev;
         };
 
