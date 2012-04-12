@@ -192,6 +192,22 @@
                 );
     };
 
+  // Escapes img[src] values in incoming Ajax html result bodies to avoid automatic preloading of all images.
+  $.imgSuppress =  $.imgSuppress  || function (html, attr) {
+                                          return html.replace(/(<img[^>]*? )src=/g,'$1'+(attr||_srcDataAttr)+'=');
+                                        };
+  // Reinserts img[src] values escaped by $.imgSuppress()
+  $.imgUnsuppress = $.imgUnsuppress || function (dom, attr) {
+                                            attr = attr || _srcDataAttr;
+                                            dom.find('img').add( dom.filter('img') )
+                                                .attr('src', function () {
+                                                    var img = $(this), 
+                                                        src = img.attr(attr);
+                                                    img.removeAttr(attr);
+                                                    return src;
+                                                  });
+                                          };
+
   var _docLoc            = document.location,
       _isDefaultPrevented = 'isDefaultPrevented',  // ...to save bandwidth
       _preventDefault     = 'preventDefault',      // ...to save bandwidth
@@ -206,7 +222,7 @@
       _replace            = 'replace',             // ...to save bandwidth
       _resultDOM          = 'resultDOM',           // ...to save bandwidth
       _result             = 'result',              // ...to save bandwidth
-      _srcDataAttr        = 'data-srcattr',        // ...to save bandwidth
+      _srcDataAttr        = 'data-srcAttr',        // ...to save bandwidth
       _protocolSlash      = /^(https?:)?\/\//,
       _triggerCustomEv    = function ( evtype, body, req, vbdata ) {
           var ev = $.Event(evtype);
@@ -358,7 +374,7 @@
                                 request[_result] = $.injectBaseHrefToHtml(xhr.responseText||'', request.url);
                                 if ( config.imgSuppress )
                                 {
-                                  request[_result] = request[_result].replace(/(<img[^>]*? )src=/g,'$1'+_srcDataAttr+'=');
+                                  request[_result] = $.imgSuppress(request[_result]);
                                 }
                               }
                               // We intentionally allow VBerror handlers to set custom .result string and then process it normally.
@@ -376,14 +392,7 @@
                                   request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result], config.stripCfg ).contents();
                                   if ( config.imgSuppress )
                                   {
-                                    request[_resultDOM].find('img')
-                                        .add( request[_resultDOM].filter('img') )
-                                            .attr('src', function () {
-                                                var img = $(this),
-                                                    src = img.attr(_srcDataAttr);
-                                                  img.removeAttr(_srcDataAttr);
-                                                  return src;
-                                              });
+                                    $.imgUnsuppress( request[_resultDOM] );
                                   }
                                   body
                                       .empty()
