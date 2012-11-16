@@ -20,7 +20,7 @@
     form p     {  margin-bottom: .25em;  }
   </style>
 
-  <script src="../../jquery/1.5/jquery-1.5.js"></script>
+  <script src="http://codecentre.eplica.is/jq/jquery-1.5.js"></script>
   <script src="jquery.virtualbrowser-1.1.js"></script>
   <script>
     jQuery(function($){
@@ -35,7 +35,7 @@
                   request.result = '<p>Error just Occurrred!</p>';
                 },
               onLoad: function (e, request, vbdata) {
-                  // $.getResultBody() helps us by stripping out <script>, <meta>, 
+                  // $.getResultBody() helps us by stripping out <script>, <meta>,
                   // <title>, <link> and <style> tags from the ajax request.result ,
                   // and wraps the remains in a <div> for easier .find()ing.
                   var dom = $.getResultBody( request.result );
