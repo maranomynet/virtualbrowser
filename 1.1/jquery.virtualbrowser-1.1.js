@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.virtualBrowser v 1.1
 // ----------------------------------------------------------------------------------
@@ -201,7 +200,7 @@
                                             attr = attr || _srcDataAttr;
                                             dom.find('img').add( dom.filter('img') )
                                                 .attr('src', function () {
-                                                    var img = $(this), 
+                                                    var img = $(this),
                                                         src = img.attr(attr);
                                                     img.removeAttr(attr);
                                                     return src;
@@ -306,7 +305,7 @@
                   var noCache = request.noCache =  request.noCache !== undefined ? request.noCache : config.noCache,
                       params = config.params ? [config.params] : [],
                       method;
-                  
+
                   if ( elm && elm.is('form') )
                   {
                     method = elm.attr('method');
@@ -362,7 +361,7 @@
                               if (!xhr) { return } // on error with jQuery 1.4, IE<=8 will sometimes run the complete callback twice - with xhr undefined the second time.
                               clearTimeout(applyLoadMsg); // prevent race-conditions between loadMsgElm injection thread, and the ajax loader.
                               body.removeClass(config.loadingClass||'');
-                              request.xhr = xhr; 
+                              request.xhr = xhr;
                               request.status = status || 'error';
                               var isError = !status || status == 'error';
                               if ( isError )
@@ -446,7 +445,7 @@
                             target: oldTarget,
                             action: oldAction
                           });
-                          
+
                         // timeout allows the "loading" thread to finish.
                         // (Otherwise tab-loading indicator keeps spinning idefinitely (in Firefox at least).)
                         setTimeout(function(){ iframe.remove(); }, 0);
@@ -501,7 +500,7 @@
             if (elm[0])
             {
               var vbElm = $(this);
-              if ( elm.is('input, button') ) // click on a submit button - 
+              if ( elm.is('input, button') ) // click on a submit button -
               {
                 if ( !elm[0].disabled )
                 {

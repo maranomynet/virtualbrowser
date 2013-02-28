@@ -1,4 +1,3 @@
-// encoding: utf-8
 // ----------------------------------------------------------------------------------
 // jQuery.fn.virtualBrowser v 1.0
 // ----------------------------------------------------------------------------------
@@ -113,7 +112,7 @@
       html =  html
                   [_replace](/(<[^>]+ (href|src|action)=["'])(["'#])/gi, '$1'+filePart+'$3') // prepend all empty/withinpage urls with filePart
                   [_replace](/(<[^>]+ (href|src|action)=["'])\?/gi, '$1'+filePart.split('?')[0]+'?') // prepend all samepage querystring URLs ("?baz=1") with just the filename
-                  [_replace](/(["'])([a-z]{3,12}:)/gi, '$1`<<`>>$2') // Escape all protocol names (potential URLs) for easy, cross-browser RegExp detection 
+                  [_replace](/(["'])([a-z]{3,12}:)/gi, '$1`<<`>>$2') // Escape all protocol names (potential URLs) for easy, cross-browser RegExp detection
                   [_replace](/(<[^>]+ (href|src|action)=["'])([^\/`])/gi, '$1'+pathPrefix+'$3') // prepend pathPrefix to all relative URLs (not starting with `/`, `//`, ` ({protocol}:)
                   [_replace](/\`<<`>>/g, ''); // Unescape "protocol" back to normal
       return html;
@@ -139,7 +138,7 @@
                   body = $(this),
                   VBdata = body.data(_virtualBrowser),
                   config = VBdata.cfg,
-                  evBeforeload = $.Event(_VBbeforeload), 
+                  evBeforeload = $.Event(_VBbeforeload),
                   evLoad, evLoaded,
                   loadmsgMode = config.loadmsgMode,
                   request = VBdata.lastRequest = { elm: elm };
@@ -163,10 +162,10 @@
                       (
                         (
                           // if event handler hasn't explicitly set passThrough to false
-                          evBeforeload[_passThrough] === undefined  &&  
+                          evBeforeload[_passThrough] === undefined  &&
                           // and elm is defined, and is `target`ted at an external window  // IDEA: allow named virtualBrowsers to target and trigger 'open' actions on eachother
                           elm  &&  elm[0].target  &&  elm[0].target != window.name
-                        ) 
+                        )
                           || // ...or...
                         (
                           /^([a-z]{3,12}:|\/\/)/i.test(url)  &&  // the URL starts with a protocol (as well as "protocol-neutral" URLs (//host.com/).)
@@ -232,7 +231,7 @@
               }
               return evBeforeload;
             },
-            
+
           'data': function () {
               return $(this).data(_virtualBrowser);
             }
@@ -275,7 +274,7 @@
             config = $.extend(
                     {
                       //url:         null,                      // String: Initial URL for the frame
-                      //noCache:     false,                     // Controls the $.ajax() cache option 
+                      //noCache:     false,                     // Controls the $.ajax() cache option
                       //params:      null,                      // Object/String: Request data (as in $.get(url, data, callback) )
                       //onBeforeload: null,                     // Function: Shorthand for .bind('VBbeforeload' handler);
                       //onLoad:      null,                      // Function: Shorthand for .bind('VBload' handler);
