@@ -230,7 +230,7 @@
               .one(evtype, function(e){ e[_stopPropagation]() }) // needed because of http://bugs.jquery.com/ticket/10699
               .trigger(ev, [req, vbdata]);
           return ev;
-        };
+        },
 
 
 
@@ -251,7 +251,7 @@
                 url = request.url;
                 delete request.elm; // incoming request objects don't get to have an elm - it only confuses things.
               }
-              else if ( typeof arg == 'string' )
+              else if ( typeof arg === 'string' )
               {
                 url = arg;
               }
@@ -285,13 +285,12 @@
                           evBeforeload[_passThrough] === undefined  &&
                           // and elm is defined, and is `target`ted at an external window
                           // (IDEA: allow named virtualBrowsers to target and trigger 'open' actions on eachother)
-                          elm  &&  elm[0].target  &&  elm[0].target != window.name
-                        )
-                          || // ...or...
+                          elm  &&  elm[0].target  &&  elm[0].target !== window.name
+                        ) || // ...or...
                         (
                           /^([a-z]{3,12}:|\/\/)/i.test(url)  &&  // the URL starts with a protocol (as well as "protocol-neutral" URLs (//host.com/).)
                           // and the URL doesn't start with the same hostName and portNumber as the current page.
-                          !url.toLowerCase()[_replace](_protocolSlash, '').indexOf( _docLoc.href.toLowerCase()[_replace](_protocolSlash, '').split('/')[0] ) == 0
+                          url.toLowerCase()[_replace](_protocolSlash, '').indexOf( _docLoc.href.toLowerCase()[_replace](_protocolSlash, '').split('/')[0] ) !== 0
                         )
                       )
                     )
@@ -325,16 +324,16 @@
                       {
                         params.push( $.param( clickedElm ) );
                       }
-                      delete VBdata._clicked
+                      delete VBdata._clicked;
                     }
                     // raise a flag if we need to submit via an iframe...
                     var mp = 'multipart/form-data';
-                    evBeforeload._doIframeSubmit =  elm.attr('enctype') == mp  ||  elm.attr('encoding') == mp  ||  !!elm.find('input:file')[0];
+                    evBeforeload._doIframeSubmit =  elm.attr('enctype') === mp  ||  elm.attr('encoding') === mp  ||  !!elm.find('input:file')[0];
                   }
                   if ( request.params )
                   {
                     params.push(
-                        (typeof request.params == 'string') ?
+                        (typeof request.params === 'string') ?
                             request.params:
                             $.param(request.params||{})
                       );
@@ -348,7 +347,7 @@
                     // timeout is required because on `evBeforeload._doIframeSubmit` we pass the submit event through
                     // ...and in those cases, instantly `.empty()`ing the body is a bad idea. :-)
                     applyLoadMsg = setTimeout(function(){
-                        config.loadmsgMode == 'replace'  &&  body.empty();
+                        config.loadmsgMode === 'replace'  &&  body.empty();
                         body.append(config.loadmsgElm);
                       }, 0);
                   }
@@ -359,62 +358,64 @@
                           type: method,
                           cache: !noCache,
                           complete: function (xhr, status) {
-                              if (!xhr) { return } // on error with jQuery 1.4, IE<=8 will sometimes run the complete callback twice - with xhr undefined the second time.
-                              clearTimeout(applyLoadMsg); // prevent race-conditions between loadMsgElm injection thread, and the ajax loader.
-                              body.removeClass(config.loadingClass||'');
-                              request.xhr = xhr;
-                              request.status = status || 'error';
-                              var isError = !status || status == 'error';
-                              if ( isError )
+                              if (xhr) // on error with jQuery 1.4, IE<=8 will sometimes run the complete callback twice - with xhr undefined the second time.
                               {
-                                _triggerCustomEv(_VBerror, body, request, VBdata);
-                              }
-                              else
-                              {
-                                request[_result] = $.injectBaseHrefToHtml(xhr.responseText||'', request.url);
-                                if ( config.imgSuppress )
+                                clearTimeout(applyLoadMsg); // prevent race-conditions between loadMsgElm injection thread, and the ajax loader.
+                                body.removeClass(config.loadingClass||'');
+                                request.xhr = xhr;
+                                request.status = status || 'error';
+                                var isError = !status || status === 'error';
+                                if ( isError )
                                 {
-                                  request[_result] = $.imgSuppress(request[_result]);
+                                  _triggerCustomEv(_VBerror, body, request, VBdata);
                                 }
-                              }
-                              // We intentionally allow VBerror handlers to set custom .result string and then process it normally.
-                              if ( request[_result] && config.selector )
-                              {
-                                request[_resultDOM] = $.getResultBody( request[_result], config.stripCfg ).find( config.selector );
-                              }
-                              // allow VBerror handlers to set custom .resultDOM and then process it normally.
-                              if ( !isError  ||  request[_result]  ||  request[_resultDOM] )
-                              {
-                                if ( !_triggerCustomEv(_VBload, body, request, VBdata)[_isDefaultPrevented]() )
+                                else
                                 {
-                                  config.loadmsgElm  &&  config.loadmsgElm.detach();
-                                  // default to just dumping resultBody's `.contents()` into the DOM.
-                                  request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result], config.stripCfg ).contents();
-                                  if ( config.imgSuppress && config.imgUnsuppress!==false )
+                                  request[_result] = $.injectBaseHrefToHtml(xhr.responseText||'', request.url);
+                                  if ( config.imgSuppress )
                                   {
-                                    $.imgUnsuppress( request[_resultDOM] );
+                                    request[_result] = $.imgSuppress(request[_result]);
                                   }
-                                  body
-                                      .empty()
-                                      .append( request[_resultDOM] );
-                                  VBdata.lastRequest = request;
-                                  _triggerCustomEv(_VBloaded, body, request, VBdata);
-                                  body
-                                      // NOTE: We can't rely on bubbling in IE8- because bubbling happens first on the container elements,
-                                      // and last on the form itself. (at least in jQuery 1.4 and 1.5)
-                                      // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
-                                      // submit events on contained forms directly.
-                                      .find('form')
-                                          .bind('submit.vb'+body.data('VBid'), $.proxy(_handleHttpRequest, body[0]) );
-                                  // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
-                                  delete request[_resultDOM];
-                                  delete request[_result];
                                 }
-                              }
-                              delete request.xhr;
-                              if ( config.disengage )
-                              {
-                                body[_virtualBrowser]('disengage');
+                                // We intentionally allow VBerror handlers to set custom .result string and then process it normally.
+                                if ( request[_result] && config.selector )
+                                {
+                                  request[_resultDOM] = $.getResultBody( request[_result], config.stripCfg ).find( config.selector );
+                                }
+                                // allow VBerror handlers to set custom .resultDOM and then process it normally.
+                                if ( !isError  ||  request[_result]  ||  request[_resultDOM] )
+                                {
+                                  if ( !_triggerCustomEv(_VBload, body, request, VBdata)[_isDefaultPrevented]() )
+                                  {
+                                    config.loadmsgElm  &&  config.loadmsgElm.detach();
+                                    // default to just dumping resultBody's `.contents()` into the DOM.
+                                    request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result], config.stripCfg ).contents();
+                                    if ( config.imgSuppress && config.imgUnsuppress!==false )
+                                    {
+                                      $.imgUnsuppress( request[_resultDOM] );
+                                    }
+                                    body
+                                        .empty()
+                                        .append( request[_resultDOM] );
+                                    VBdata.lastRequest = request;
+                                    _triggerCustomEv(_VBloaded, body, request, VBdata);
+                                    body
+                                        // NOTE: We can't rely on bubbling in IE8- because bubbling happens first on the container elements,
+                                        // and last on the form itself. (at least in jQuery 1.4 and 1.5)
+                                        // This makes .isDefaultPrevented() checks fail when plugin-users bind (and .preventDefault())
+                                        // submit events on contained forms directly.
+                                        .find('form')
+                                            .bind('submit.vb'+body.data('VBid'), $.proxy(_handleHttpRequest, body[0]) );
+                                    // Throw out unneccessary properties that we don't want to store. (Saves memory among other things.)
+                                    delete request[_resultDOM];
+                                    delete request[_result];
+                                  }
+                                }
+                                delete request.xhr;
+                                if ( config.disengage )
+                                {
+                                  body[_virtualBrowser]('disengage');
+                                }
                               }
                             }
                           };
@@ -422,7 +423,7 @@
                   if ( evBeforeload._doIframeSubmit )
                   {
                     // perform a fake XHR request by temporarily injecting an iframe;
-                    var iframeName = 'if'+ (new Date).getTime(),
+                    var iframeName = 'if'+ (new Date()).getTime(),
                         // javascript:""; seems to be the safest bet for HTTP and HTTPS pages.
                         // See here: http://www.zachleat.com/web/adventures-in-i-frame-shims-or-how-i-learned-to-love-the-bomb/
                         iframe =  $('<iframe name="'+ iframeName +'" src=\'javascript:"";\' style="position:absolute;top:-999em;left:-999em;visibility:hidden;" />')
@@ -493,7 +494,7 @@
           if ( !e[_isDefaultPrevented]()  &&  !e[_virtualBrowser+'Handled'] ) // leave the event alone, if it's already handled by a inner virtualBrowser
           {
             var elm = $(e.target).closest(
-                          (e.type == 'submit') ?
+                          (e.type === 'submit') ?
                               '[action]':
                               'input:submit, button:submit, input:image, [href]',
                           this
@@ -527,7 +528,7 @@
               }
               else // normal link-click or submit event
               {
-                var bfloadEv = _methods['load'].call(vbElm[0], elm, {_nativeEvent:true});
+                var bfloadEv = _methods.load.call(vbElm[0], elm, {_nativeEvent:true});
                 if ( !bfloadEv[_passThrough] )
                 {
                   !bfloadEv._doIframeSubmit  &&  e[_preventDefault]();
@@ -543,7 +544,7 @@
 
       fnVB = $.fn[_virtualBrowser] = function (config, args) {
           var bodies = this,
-              confIsString = typeof config == 'string';
+              confIsString = typeof config === 'string';
           if (confIsString)
           {
             var method = _methods[config],
@@ -571,12 +572,12 @@
                         cfg[onType]  &&  bodies.bind( 'VB'+type.toLowerCase(), cfg[onType] );
                         delete cfg[onType];
                       });
-                    cfg.params = (typeof cfg.params == 'string') ?
+                    cfg.params = (typeof cfg.params === 'string') ?
                                         cfg.params:
                                         $.param(cfg.params||{});
                     args && (cfg.url = args);
 
-                    if ( cfg.loadmsgMode != 'none' )
+                    if ( cfg.loadmsgMode !== 'none' )
                     {
                       var loadmsgElm = cfg.loadmsgElm || '<div class="loading" />',
                           // Automatically sniff the document language and choose a loading message accordingly - defaulting on English
@@ -618,7 +619,7 @@
                           .add( body.filter('form') ) // allow body itself to be a <form>
                               .bind( 'submit.vb'+body.data('VBid'), $.proxy(_handleHttpRequest, body[0]) );
                     }
-                  })
+                  });
 
           }
           return this;
@@ -647,6 +648,6 @@
       // FIXME: add more translations...
       en: { loading: 'Loading...' },
       is: { loading: 'Sæki gögn...' }
-    }
+    };
 
 })(jQuery);
