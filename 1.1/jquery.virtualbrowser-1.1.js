@@ -35,6 +35,7 @@
     * selector:      null,                      // String selector to quickly filter the incoming DOM just before injecting it into the virtualBrowser container/body. Defaults to just dumping the whole request body
     * stripCfg:      null,                      // Object: config for the $.getResultsBody() method
     * imgSuppress:   false,                     // Boolean: true renames img[src] to img[data-srcattr] until req.resultDOM has been inserted into the DOM, to stop the browser from preloading every <img> in the result dom
+    * imgUnsuppress: true,                      // Boolean: true automatically reenables suppressed img[src] before req.resultDOM is inserted to the page DOM (Applies only when `imgSuppress` is true.)
     * onBeforeload:  null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
     * onError:       null,                      // Function: Shorthand for .bind('VBerror', handler);
     * onLoad:        null,                      // Function: Shorthand for .bind('VBload', handler);
@@ -389,7 +390,7 @@
                                   config.loadmsgElm  &&  config.loadmsgElm.detach();
                                   // default to just dumping resultBody's `.contents()` into the DOM.
                                   request[_resultDOM] = request[_resultDOM]  ||  $.getResultBody( request[_result], config.stripCfg ).contents();
-                                  if ( config.imgSuppress )
+                                  if ( config.imgSuppress && config.imgUnsuppress!==false )
                                   {
                                     $.imgUnsuppress( request[_resultDOM] );
                                   }
@@ -630,6 +631,7 @@
       //params:       null,                      // Object/String: Persistent request data (as in $.get(url, data, callback) ) that gets added to *every* 'load' request.
       //stripCfg:     null,                      // Object: config for the $.getResultsBody() method
       //imgSuppress:  false,                     // Boolean: true renames img[src] to img[data-srcattr] until req.resultDOM has been inserted into the DOM, to stop the browser from preloading every <img> in the result dom
+      //imgUnsuppress: true,                     // Boolean: true automatically reenables suppressed img[src] before req.resultDOM is inserted to the page DOM (Applies only when `imgSuppress` is true.)
       //selector:     null,                      // String selector to quickly filter the incoming DOM before injecting it into the virtualBrowser container/body. Defaults to just dumping the whole result body
       //onBeforeload: null,                      // Function: Shorthand for .bind('VBbeforeload' handler);
       //onLoad:       null,                      // Function: Shorthand for .bind('VBload' handler);
