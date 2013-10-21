@@ -7,6 +7,7 @@
 //
 // Dual licensed under a MIT licence (http://en.wikipedia.org/wiki/MIT_License)
 // and GPL 2.0 or above (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
+// More info: https://github.com/maranomynet/virtualbrowser/
 // ----------------------------------------------------------------------------------
 
 /*
