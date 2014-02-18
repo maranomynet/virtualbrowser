@@ -498,7 +498,7 @@
                           (e.type === 'submit') ?
                               '[action]':
                               'input:submit, button:submit, input:image, [href]',
-                          this
+                          this.parentNode
                         );
             if (elm[0])
             {
